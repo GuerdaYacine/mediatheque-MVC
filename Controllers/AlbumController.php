@@ -33,12 +33,6 @@ class AlbumController
 
         $albums = $this->albumModel->getAllAlbums();
 
-        foreach ($albums as $album) {
-            $album->borrow();
-        }
-
-        var_dump($albums);
-
         foreach ($albums as &$album) {
             $album['track_number'] = $this->albumModel->getTrackNumber($album['id']);
         }
