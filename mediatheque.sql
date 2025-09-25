@@ -1,0 +1,48 @@
+CREATE DATABASE mediatheque DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+USE mediatheque;
+
+CREATE TABLE users (
+    id INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+    username VARCHAR(50) NOT NULL,
+    email VARCHAR(255) NOT NULL UNIQUE,
+    password VARCHAR(255) NOT NULL,
+    created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+    updated_at DATETIME DEFAULT NULL ON UPDATE CURRENT_TIMESTAMP
+);
+
+CREATE TABLE media (
+    id INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+    title VARCHAR(255) NOT NULL,
+    author VARCHAR(255) NOT NULL,
+    available BOOLEAN NOT NULL DEFAULT TRUE,
+    media_type ENUM('book','album','movie') NOT NULL
+);
+
+CREATE TABLE book (
+    id INT UNSIGNED PRIMARY KEY,
+    page_number INT NOT NULL,
+    FOREIGN KEY (id) REFERENCES media(id) ON DELETE CASCADE
+);
+
+CREATE TABLE movie (
+    id INT UNSIGNED PRIMARY KEY,
+    duration DOUBLE NOT NULL,
+    genre ENUM('Action','Comédie','Drame','Horreur','Autre') NOT NULL,
+    FOREIGN KEY (id) REFERENCES media(id) ON DELETE CASCADE
+);
+
+CREATE TABLE album (
+    id INT UNSIGNED PRIMARY KEY,
+    track_number INT NOT NULL,
+    editor VARCHAR(255) NOT NULL,
+    FOREIGN KEY (id) REFERENCES media(id) ON DELETE CASCADE
+);
+
+CREATE TABLE song (
+    id INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+    album_id INT UNSIGNED NOT NULL,
+    title VARCHAR(255) NOT NULL,
+    duration FLOAT NOT NULL,
+    note INT UNSIGNED NOT NULL,
+    FOREIGN KEY (album_id) REFERENCES album(id) ON DELETE CASCADE
+);
