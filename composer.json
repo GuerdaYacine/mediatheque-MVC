@@ -1,0 +1,17 @@
+{
+  "name": "yacine/poc-mvc",
+  "autoload": {
+    "psr-4": {
+      "Core\\": "Core/",
+      "Models\\": "models/",
+      "Controllers\\": "controllers/"
+    }
+  },
+  "authors": [
+    {
+      "name": "Yacine",
+      "email": "guerda.yacine60100@gmail.com"
+    }
+  ],
+  "require": {}
+}
