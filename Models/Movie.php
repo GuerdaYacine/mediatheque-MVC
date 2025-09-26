@@ -27,6 +27,8 @@ class Movie extends Media
     private PDOStatement $statementCreateMovie;
     private PDOStatement $statementCreateMovieIntoMovie;
     private PDOStatement $statementGetThreeRandomMovies;
+    private PDOStatement $statementGetAvailableMovies;
+    private PDOStatement $statementSearchMovies;
     private PDO $pdo;
 
     public function __construct(Database $db)
@@ -79,6 +81,20 @@ class Movie extends Media
             "
         );
 
+        $this->statementGetAvailableMovies = $this->pdo->prepare(
+            "SELECT m.id, m.title, m.author, m.available, m.image, mo.duration, mo.genre
+            FROM media m
+            JOIN movie mo USING(id)
+            WHERE m.available = 1 
+            "
+        );
+
+        $this->statementSearchMovies = $this->pdo->prepare(
+            "SELECT m.id, m.title, m.author, m.available, m.image, mo.duration, mo.genre
+             FROM media m
+             JOIN movie mo USING(id)
+             WHERE m.title LIKE :search"
+        );
     }
 
     public function getDuration(): int
@@ -156,4 +172,26 @@ class Movie extends Media
         $this->statementGetThreeRandomMovies->execute();
         return $this->statementGetThreeRandomMovies->fetchAll();
     }
+
+public function getAvailableMovies(?string $search = null): array
+{
+    if ($search) {
+        $this->statementSearchMovies->execute(['search' => '%' . $search . '%']);
+        return array_filter(
+            $this->statementSearchMovies->fetchAll(),
+            fn($movie) => $movie['available'] == 1
+        );
+    } else {
+        $this->statementGetAvailableMovies->execute();
+        return $this->statementGetAvailableMovies->fetchAll();
+    }
+}
+
+
+    public function searchMovies(string $search): array
+    {
+        $this->statementSearchMovies->execute(['search' => '%' . $search . '%']);
+        return $this->statementSearchMovies->fetchAll();
+    }
+
 }

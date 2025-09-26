@@ -29,6 +29,17 @@
                 <?php endif; ?>
             </div>
 
+                        <div>
+                <h1>Filtrer</h1>
+                <form action="" method="get">
+                    <label for="filter">Afficher seulement ceux disponibles</label>
+                    <input type="checkbox" name="filter" id="filter">
+
+                    <input type="text" placeholder="Recherchez par titre" name="search">
+                    <button>Filtrer</button>
+                </form>
+            </div>
+
             <?php if (empty($movies)) : ?>
                 <div class="empty-state">
                     <div class="empty-icon">

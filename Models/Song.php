@@ -19,6 +19,7 @@ class Song
     private PDOStatement $statementUpdateSong;
     private PDOStatement $statementDeleteSong;
     private PDOStatement $statementCreateSong;
+    private PDOStatement $statementGetAvailableSongs;
 
     public function __construct(Database $db)
     {
@@ -54,6 +55,15 @@ class Song
         $this->statementCreateSong = $this->pdo->prepare(
             "INSERT INTO song (album_id, title, author, available, image, duration, note)
              VALUES (:album_id, :title, :author, :available, :image, :duration, :note)"
+        );
+
+        $this->statementGetAvailableSongs = $this->pdo->prepare(
+            "SELECT s.*, a.id AS album_id, m.title AS album_title 
+                FROM song s 
+                LEFT JOIN album a ON s.album_id = a.id 
+                LEFT JOIN media m ON a.id = m.id
+            WHERE s.available = 1
+            "
         );
     }
 
@@ -139,5 +149,11 @@ class Song
         $this->statementCreateSong->bindParam(':duration', $duration);
         $this->statementCreateSong->bindParam(':note', $note);
         return $this->statementCreateSong->execute();
+    }
+
+    public function getAvailableSongs(): array
+    {
+        $this->statementGetAvailableSongs->execute();
+        return $this->statementGetAvailableSongs->fetchAll();
     }
 }

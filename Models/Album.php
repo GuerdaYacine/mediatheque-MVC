@@ -20,6 +20,7 @@ class Album extends Media
     private PDOStatement $statementCreateAlbumIntoAlbum;
     private PDOStatement $statementCountTracks;
     private PDOStatement $statementGetThreeRandomAlbums;
+    private PDOStatement $statementGetAvailableAlbums;
 
     public function __construct(Database $db)
     {
@@ -72,6 +73,14 @@ class Album extends Media
             WHERE m.available = 1
             ORDER BY RAND()
             LIMIT 3
+            "
+        );
+
+        $this->statementGetAvailableAlbums = $this->pdo->prepare(
+            "SELECT m.id, m.title, m.author, m.available, m.image, a.editor
+            FROM media m
+            JOIN album a USING(id)
+            WHERE m.available = 1
             "
         );
     }
@@ -153,5 +162,11 @@ class Album extends Media
     {
         $this->statementGetThreeRandomAlbums->execute();
         return $this->statementGetThreeRandomAlbums->fetchAll();
+    }
+
+    public function getAvailableAlbum(): array
+    {
+        $this->statementGetAvailableAlbums->execute();
+        return $this->statementGetAvailableAlbums->fetchAll();
     }
 }

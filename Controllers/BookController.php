@@ -29,7 +29,13 @@ class BookController
     public function show(): void
     {
         $isLoggedIn = $this->isLoggedIn();
-        $books = $this->bookModel->getAllBooks();
+
+        if(isset($_GET['filter']) && $_GET['filter'] === 'on'){
+            $books = $this->bookModel->getAvailableBooks();
+        }else{
+            $books = $this->bookModel->getAllBooks();
+        }
+        
         require_once __DIR__ . '/../Views/books/index.php';
     }
 

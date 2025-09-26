@@ -32,7 +32,11 @@ class SongController
     public function show(): void
     {
         $isLoggedIn = $this->isLoggedIn();
-        $songs = $this->songModel->getAllSongs();
+        if(isset($_GET['filter']) && $_GET['filter'] === 'on'){
+            $songs = $this->songModel->getAvailableSongs();
+        }else{
+            $songs = $this->songModel->getAllSongs();
+        }
         require_once __DIR__ . '/../Views/songs/index.php';
     }
 

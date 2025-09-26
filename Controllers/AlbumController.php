@@ -28,10 +28,13 @@ class AlbumController
 
     public function show(): void
     {
-
         $isLoggedIn = $this->isLoggedIn();
 
-        $albums = $this->albumModel->getAllAlbums();
+        if(isset($_GET['filter']) && $_GET['filter'] === 'on'){
+            $albums = $this->albumModel->getAvailableAlbum();
+        }else{
+            $albums = $this->albumModel->getAllAlbums();
+        }
 
         foreach ($albums as $key => $album) {
             $albums[$key]['track_number'] = $this->albumModel->getTrackNumber($album['id']);

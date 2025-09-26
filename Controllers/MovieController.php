@@ -28,10 +28,17 @@ class MovieController
 
     public function show(): void
     {
-
         $isLoggedIn = $this->isLoggedIn();
 
-        $movies = $this->movieModel->getAllMovies();
+        $search = $_GET['search'] ?? null;
+
+        if (isset($_GET['filter']) && $_GET['filter'] === 'on') {
+            $movies = $this->movieModel->getAvailableMovies($search);
+        } elseif ($search) {
+            $movies = $this->movieModel->searchMovies($search);
+        } else {
+            $movies = $this->movieModel->getAllMovies();
+        }
 
         require_once __DIR__ . '/../Views/movies/index.php';
     }
