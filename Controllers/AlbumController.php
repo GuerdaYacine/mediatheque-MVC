@@ -33,9 +33,10 @@ class AlbumController
 
         $albums = $this->albumModel->getAllAlbums();
 
-        foreach ($albums as &$album) {
-            $album['track_number'] = $this->albumModel->getTrackNumber($album['id']);
+        foreach ($albums as $key => $album) {
+            $albums[$key]['track_number'] = $this->albumModel->getTrackNumber($album['id']);
         }
+
 
 
         require_once __DIR__ . '/../Views/albums/index.php';

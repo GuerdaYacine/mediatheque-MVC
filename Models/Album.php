@@ -66,7 +66,7 @@ class Album extends Media
         );
 
         $this->statementGetThreeRandomAlbums = $this->pdo->prepare(
-            "SELECT m.id, m.title, m.author, m.available, a.editor
+            "SELECT m.id, m.title, m.author, m.available, m.image, a.editor
             FROM media m 
             JOIN album a USING(id)
             WHERE m.available = 1

@@ -21,6 +21,11 @@ class HomeController
     public function show()
     {
         $albums = $this->albumModel->getThreeRandomAlbums();
+
+        foreach ($albums as $key => $album) {
+            $albums[$key]['track_number'] = $this->albumModel->getTrackNumber($album['id']);
+        }
+
         $books = $this->bookModel->getThreeRandomBooks();
         $movies = $this->movieModel->getThreeRandomMovies();
 

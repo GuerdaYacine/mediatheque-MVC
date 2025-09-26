@@ -41,7 +41,7 @@
                         <?php foreach($albums as $album) : ?>
                             <div class="media-card album-card">
                                 <div class="media-image">
-                                    <img src="<?= $album['image'] ?>" alt="<?= $album['title'] ?>">
+                                    <img src="<?=$album['image'] ?>" alt="<?= $album['title'] ?>">
                                     <div class="availability-badge <?= $album['available'] ? 'available' : 'unavailable' ?>">
                                         <i class="fas <?= $album['available'] ? 'fa-check' : 'fa-times' ?>"></i>
                                         <?= $album['available'] ? 'Disponible' : 'Indisponible' ?>
