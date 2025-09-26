@@ -1,6 +1,6 @@
 <?php
 
-$router->get('/', 'Controllers\HomeController');
+$router->get('/', 'Controllers\HomeController@show');
 
 
 // --------- User ---------

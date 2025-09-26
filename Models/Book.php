@@ -15,6 +15,7 @@ class Book extends Media
     private PDOStatement $statementDeleteBook;
     private PDOStatement $statementCreateBook;
     private PDOStatement $statementCreateBookIntoBook;
+    private PDOStatement $statementGetThreeRandomBooks;
     private PDO $pdo;
 
     public function __construct(Database $db)
@@ -55,6 +56,15 @@ class Book extends Media
 
         $this->statementCreateBookIntoBook = $this->pdo->prepare(
             "INSERT INTO book (id, page_number) VALUES (:id, :page_number)"
+        );
+        $this->statementGetThreeRandomBooks = $this->pdo->prepare(
+            "SELECT m.id, m.title, m.author, m.available, m.image, b.page_number
+            FROM media m
+            JOIN book b USING(id)
+            WHERE m.available = 1
+            ORDER BY RAND()
+            LIMIT 3
+            "
         );
     }
 
@@ -115,5 +125,11 @@ class Book extends Media
         $this->statementCreateBookIntoBook->bindParam(':id', $id);
         $this->statementCreateBookIntoBook->bindParam(':page_number', $pageNumber);
         return $this->statementCreateBookIntoBook->execute();
+    }
+
+    public function GetThreeRandomBooks(): array
+    {
+        $this->statementGetThreeRandomBooks->execute();
+        return $this->statementGetThreeRandomBooks->fetchAll();
     }
 }

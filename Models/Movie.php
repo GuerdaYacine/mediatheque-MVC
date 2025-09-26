@@ -26,6 +26,7 @@ class Movie extends Media
     private PDOStatement $statementDeleteMovie;
     private PDOStatement $statementCreateMovie;
     private PDOStatement $statementCreateMovieIntoMovie;
+    private PDOStatement $statementGetThreeRandomMovies;
     private PDO $pdo;
 
     public function __construct(Database $db)
@@ -67,6 +68,17 @@ class Movie extends Media
         $this->statementCreateMovieIntoMovie = $this->pdo->prepare(
             "INSERT INTO movie (id, duration, genre) VALUES (:id, :duration, :genre)"
         );
+
+        $this->statementGetThreeRandomMovies = $this->pdo->prepare(
+            "SELECT m.id, m.title, m.author, m.available, m.image, mo.duration, mo.genre
+            FROM media m
+            JOIN movie mo USING(id)
+            WHERE m.available = 1
+            ORDER BY RAND()
+            LIMIT 3
+            "
+        );
+
     }
 
     public function getDuration(): int
@@ -137,5 +149,11 @@ class Movie extends Media
         $this->statementCreateMovieIntoMovie->bindValue(':genre', $genre->value);
 
         return $this->statementCreateMovieIntoMovie->execute();
+    }
+
+    public function getThreeRandomMovies(): array
+    {
+        $this->statementGetThreeRandomMovies->execute();
+        return $this->statementGetThreeRandomMovies->fetchAll();
     }
 }

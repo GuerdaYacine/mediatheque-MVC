@@ -19,6 +19,7 @@ class Album extends Media
     private PDOStatement $statementCreateAlbum;
     private PDOStatement $statementCreateAlbumIntoAlbum;
     private PDOStatement $statementCountTracks;
+    private PDOStatement $statementGetThreeRandomAlbums;
 
     public function __construct(Database $db)
     {
@@ -62,6 +63,16 @@ class Album extends Media
 
         $this->statementCountTracks = $this->pdo->prepare(
             "SELECT COUNT(*) FROM song WHERE album_id = :id"
+        );
+
+        $this->statementGetThreeRandomAlbums = $this->pdo->prepare(
+            "SELECT m.id, m.title, m.author, m.available, a.editor
+            FROM media m 
+            JOIN album a USING(id)
+            WHERE m.available = 1
+            ORDER BY RAND()
+            LIMIT 3
+            "
         );
     }
 
@@ -136,5 +147,11 @@ class Album extends Media
         $this->statementCreateAlbumIntoAlbum->bindParam(':id', $id);
         $this->statementCreateAlbumIntoAlbum->bindParam(':editor', $editor);
         return $this->statementCreateAlbumIntoAlbum->execute();
+    }
+
+    public function getThreeRandomAlbums(): array
+    {
+        $this->statementGetThreeRandomAlbums->execute();
+        return $this->statementGetThreeRandomAlbums->fetchAll();
     }
 }
