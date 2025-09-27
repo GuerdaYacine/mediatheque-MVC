@@ -7,13 +7,6 @@ use Models\User;
 
 class UserController
 {
-    private User $userModel;
-
-    public function __construct(User $userModel)
-    {
-        $this->userModel = $userModel;
-    }
-
     public function register(): void
     {
         $errors = [
@@ -34,7 +27,7 @@ class UserController
             $email = $input['email'] ?? '';
             $password = $_POST['password'] ?? '';
 
-            $existingUser = $this->userModel->getUserByEmail($email);
+            $existingUser = User::getUserByEmail($email);
 
             if (!$username) {
                 $errors['username'] = 'Veuillez saisir un nom d\'utilisateur';
@@ -56,7 +49,7 @@ class UserController
             }
 
             if (empty(array_filter($errors))) {
-                $user = $this->userModel->createUser($username, $email, $password);
+                $user = User::createUser($username, $email, $password);
                 if ($user) {
                     header("Location: /login");
                     exit;
@@ -72,8 +65,6 @@ class UserController
             'email' => '',
             'password' => ''
         ];
-
-        $user = null;
 
         if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $input = filter_input_array(INPUT_POST, [
@@ -94,12 +85,12 @@ class UserController
             }
 
             if (empty(array_filter($errors))) {
-                $user = $this->userModel->getUserByEmail($email);
-                if ($user && password_verify($password, $user['password'])) {
+                $user = User::getUserByEmail($email);
+                if ($user && password_verify($password, $user->getPassword())) {
                     session_start();
-                    $_SESSION['user_id'] = $user['id'];
-                    $_SESSION['username'] = $user['username'];
-                    $_SESSION['email'] = $user['email'];
+                    $_SESSION['user_id'] = $user->getId();
+                    $_SESSION['username'] = $user->getUsername();
+                    $_SESSION['email'] = $user->getEmail();
                     header("Location: /albums");
                     exit;
                 } else {

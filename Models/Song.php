@@ -2,69 +2,22 @@
 
 namespace Models;
 
-use Database;
-use PDOStatement;
-use PDO;
+use \Database\Database;
 
 class Song
 {
-    private string $title;
-    private float $duration;
-    private int $note;
-    private int $albumId;
-    private PDO $pdo;
+    private ?string $albumTitle;
 
-    private PDOStatement $statementReadOneSong;
-    private PDOStatement $statementReadAllSongs;
-    private PDOStatement $statementUpdateSong;
-    private PDOStatement $statementDeleteSong;
-    private PDOStatement $statementCreateSong;
-    private PDOStatement $statementGetAvailableSongs;
+    public function __construct(private int $id, private ?int $albumId, private string $title, private string $author, private int $available, private string $image, private int $duration, private int $note) {}
 
-    public function __construct(Database $db)
+    public function getId(): int
     {
-        $this->pdo = $db->connection;
+        return $this->id;
+    }
 
-        $this->statementReadAllSongs = $this->pdo->prepare(
-            "SELECT s.*, a.id AS album_id, m.title AS album_title 
-                FROM song s 
-                LEFT JOIN album a ON s.album_id = a.id 
-                LEFT JOIN media m ON a.id = m.id"
-        );
-
-        $this->statementReadOneSong = $this->pdo->prepare(
-            "SELECT s.*, a.id AS album_id, m.title AS album_title 
-                FROM song s 
-                LEFT JOIN album a ON s.album_id = a.id 
-                LEFT JOIN media m ON a.id = m.id 
-                WHERE s.id = :id"
-        );
-
-
-        $this->statementUpdateSong = $this->pdo->prepare(
-            "UPDATE song
-             SET album_id = :album_id, title = :title, author = :author, available = :available, image = :image, duration = :duration, note = :note
-             WHERE id = :id"
-        );
-
-        $this->statementDeleteSong = $this->pdo->prepare(
-            "DELETE FROM song
-             WHERE id = :id"
-        );
-
-        $this->statementCreateSong = $this->pdo->prepare(
-            "INSERT INTO song (album_id, title, author, available, image, duration, note)
-             VALUES (:album_id, :title, :author, :available, :image, :duration, :note)"
-        );
-
-        $this->statementGetAvailableSongs = $this->pdo->prepare(
-            "SELECT s.*, a.id AS album_id, m.title AS album_title 
-                FROM song s 
-                LEFT JOIN album a ON s.album_id = a.id 
-                LEFT JOIN media m ON a.id = m.id
-            WHERE s.available = 1
-            "
-        );
+    public function setId(int $id): void
+    {
+        $this->id = $id;
     }
 
     public function getTitle(): string
@@ -75,11 +28,41 @@ class Song
     {
         $this->title = $title;
     }
-    public function getDuration(): float
+
+    public function getAuthor(): string
+    {
+        return $this->author;
+    }
+
+    public function setAuthor(string $author): void
+    {
+        $this->author = $author;
+    }
+
+    public function getAvailable(): int
+    {
+        return $this->available;
+    }
+
+    public function setAvailable(int $available): void
+    {
+        $this->available = $available;
+    }
+
+    public function getImage(): string
+    {
+        return $this->image;
+    }
+
+    public function setImage(string $image): void
+    {
+        $this->image = $image;
+    }
+    public function getDuration(): int
     {
         return $this->duration;
     }
-    public function setDuration(float $duration): void
+    public function setDuration(int $duration): void
     {
         $this->duration = $duration;
     }
@@ -91,7 +74,7 @@ class Song
     {
         $this->note = max(0, min(5, $note));
     }
-    public function getAlbumId(): int
+    public function getAlbumId(): ?int
     {
         return $this->albumId;
     }
@@ -100,60 +83,114 @@ class Song
         $this->albumId = $albumId;
     }
 
-    public function getAllSongs(): array
+    public function getAlbumTitle(): ?string
     {
-        $this->statementReadAllSongs->execute();
-        return $this->statementReadAllSongs->fetchAll();
+        return $this->albumTitle;
     }
 
-    public function getAllSongsByAlbum(int $albumId): array
+    public function setAlbumTitle(?string $albumTitle): void
     {
-        $this->statementReadAllSongs->bindParam(':album_id', $albumId);
-        $this->statementReadAllSongs->execute();
-        return $this->statementReadAllSongs->fetchAll();
+        $this->albumTitle = $albumTitle;
     }
 
-    public function getOneSong(int $id): array|false
+    public static function getAllSongs(): array
     {
-        $this->statementReadOneSong->bindParam(':id', $id);
-        $this->statementReadOneSong->execute();
-        return $this->statementReadOneSong->fetch();
+        $db = new Database();
+        $connexion = $db->connect();
+        $statementReadAllSongs = $connexion->prepare(
+            "SELECT s.*, a.id AS album_id, m.title AS album_title 
+             FROM song s 
+             LEFT JOIN album a ON s.album_id = a.id 
+             LEFT JOIN media m ON a.id = m.id"
+        );
+        $statementReadAllSongs->execute();
+        $songsDB = $statementReadAllSongs->fetchAll();
+        $songs = [];
+        foreach ($songsDB as $song) {
+            $songInst = new Song($song['id'], $song['album_id'], $song['title'], $song['author'], $song['available'], $song['image'], $song['duration'], $song['note']);
+            $songInst->setAlbumTitle($song['album_title'] ?? null);
+            array_push($songs, $songInst);
+        }
+        return $songs;
     }
 
-    public function updateSong(int $id, ?int $albumId, string $title, string $author, int $available, string $image, float $duration, int $note): bool
+    public static function createSong(?int $albumId, string $title, string $author, int $available, string $image, int $duration, int $note): bool
     {
-        $this->statementUpdateSong->bindParam(':id', $id);
-        $this->statementUpdateSong->bindParam(':album_id', $albumId);
-        $this->statementUpdateSong->bindParam(':title', $title);
-        $this->statementUpdateSong->bindParam(':author', $author);
-        $this->statementUpdateSong->bindParam(':available', $available);
-        $this->statementUpdateSong->bindParam(':image', $image);
-        $this->statementUpdateSong->bindParam(':duration', $duration);
-        $this->statementUpdateSong->bindParam(':note', $note);
-        return $this->statementUpdateSong->execute();
+        $db = new Database();
+        $connexion = $db->connect();
+
+        $statementCreateSong = $connexion->prepare(
+            "INSERT INTO song (album_id, title, author, available, image, duration, note)
+             VALUES (:album_id, :title, :author, :available, :image, :duration, :note)"
+        );
+
+        $statementCreateSong->bindParam(':album_id', $albumId);
+        $statementCreateSong->bindParam(':title', $title);
+        $statementCreateSong->bindParam(':author', $author);
+        $statementCreateSong->bindParam(':available', $available);
+        $statementCreateSong->bindParam(':image', $image);
+        $statementCreateSong->bindParam(':duration', $duration);
+        $statementCreateSong->bindParam(':note', $note);
+
+        return $statementCreateSong->execute();
     }
 
-    public function deleteSong(int $id): bool
+    public static function updateSong(int $id, ?int $albumId, string $title, string $author, int $available, string $image, int $duration, int $note): bool
     {
-        $this->statementDeleteSong->bindParam(':id', $id);
-        return $this->statementDeleteSong->execute();
+        $db = new Database();
+        $connexion = $db->connect();
+
+        $statementUpdateSong = $connexion->prepare(
+            "UPDATE song
+          SET album_id = :album_id, title = :title, author = :author, available = :available, image = :image, duration = :duration, note = :note
+          WHERE id = :id"
+        );
+
+        $statementUpdateSong->bindParam(':id', $id);
+        $statementUpdateSong->bindParam(':album_id', $albumId);
+        $statementUpdateSong->bindParam(':title', $title);
+        $statementUpdateSong->bindParam(':author', $author);
+        $statementUpdateSong->bindParam(':available', $available);
+        $statementUpdateSong->bindParam(':image', $image);
+        $statementUpdateSong->bindParam(':duration', $duration);
+        $statementUpdateSong->bindParam(':note', $note);
+
+        return $statementUpdateSong->execute();
     }
 
-    public function createSong(?int $albumId, string $title, string $author, int $available, string $image, float $duration, int $note): bool
+    public static function getOneSong(int $id): Song
     {
-        $this->statementCreateSong->bindParam(':album_id', $albumId);
-        $this->statementCreateSong->bindParam(':title', $title);
-        $this->statementCreateSong->bindParam(':author', $author);
-        $this->statementCreateSong->bindParam(':available', $available);
-        $this->statementCreateSong->bindParam(':image', $image);
-        $this->statementCreateSong->bindParam(':duration', $duration);
-        $this->statementCreateSong->bindParam(':note', $note);
-        return $this->statementCreateSong->execute();
+        $db = new Database();
+        $connexion = $db->connect();
+
+        $statementReadOneSong = $connexion->prepare(
+            "SELECT s.*, a.id AS album_id, m.title AS album_title 
+             FROM song s 
+             LEFT JOIN album a ON s.album_id = a.id 
+             LEFT JOIN media m ON a.id = m.id 
+             WHERE s.id = :id"
+        );
+
+        $statementReadOneSong->bindParam(':id', $id);
+        $statementReadOneSong->execute();
+        $song = $statementReadOneSong->fetch();
+
+        $song = new Song($song['id'], $song['album_id'], $song['title'], $song['author'], $song['available'], $song['image'], $song['duration'], $song['note']);
+
+        return $song;
     }
 
-    public function getAvailableSongs(): array
+    public static function deleteSong(int $id): bool
     {
-        $this->statementGetAvailableSongs->execute();
-        return $this->statementGetAvailableSongs->fetchAll();
+        $db = new Database();
+        $connexion = $db->connect();
+
+        $statementDeleteSong = $connexion->prepare(
+            "DELETE FROM song
+          WHERE id = :id"
+        );
+        $statementDeleteSong->bindParam(':id', $id);
+        $success = $statementDeleteSong->execute();
+        return $success;
     }
 }

@@ -1,3 +1,10 @@
+<?php
+
+use Models\Genre;
+
+require_once __DIR__ . '/../../models/Movie.php';
+?>
+
 <!DOCTYPE html>
 <html lang="en">
 
@@ -74,20 +81,23 @@
                         </label>
                         <select name="genre"
                             id="genre"
-                            class="form-select <?= $errors['genre'] ? 'error' : '' ?>">
-                            <?php foreach (\Models\Genre::cases() as $g): ?>
-                                <option value="<?= $g->value ?>" <?= isset($genre) && $genre === $g->value ? 'selected' : '' ?>>
-                                    <?= $g->value ?>
+                            class="form-select <?= !empty($errors['genre']) ? 'error' : '' ?>">
+                            <option value="">Sélectionnez un genre</option>
+                            <?php foreach (Genre::cases() as $genre): ?>
+                                <option value="<?= $genre->value ?>" <?= isset($_POST['genre']) && $_POST['genre'] === $genre->value ? 'selected' : '' ?>>
+                                    <?= $genre->value ?>
                                 </option>
                             <?php endforeach; ?>
                         </select>
-                        <?php if ($errors['genre']) : ?>
+                        <?php if (!empty($errors['genre'])) : ?>
                             <div class="error-message">
                                 <i class="fas fa-exclamation-circle"></i>
                                 <?= $errors['genre'] ?>
                             </div>
                         <?php endif; ?>
                     </div>
+
+
 
                     <div class="form-group">
                         <label for="duration">

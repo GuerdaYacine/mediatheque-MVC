@@ -4,15 +4,10 @@ namespace Controllers;
 
 use Models\Movie;
 
+require_once __DIR__ . '/../models/Movie.php';
+
 class MovieController
 {
-    private Movie $movieModel;
-
-    public function __construct(Movie $movieModel)
-    {
-        $this->movieModel = $movieModel;
-    }
-
     private function checkAuth(): void
     {
         if (!isset($_SESSION['username'])) {
@@ -32,13 +27,10 @@ class MovieController
 
         $search = $_GET['search'] ?? null;
 
-        if (isset($_GET['filter']) && $_GET['filter'] === 'on') {
-            $movies = $this->movieModel->getAvailableMovies($search);
-        } elseif ($search) {
-            $movies = $this->movieModel->searchMovies($search);
-        } else {
-            $movies = $this->movieModel->getAllMovies();
-        }
+        $movies = Movie::getAllMovies();
+
+        // var_dump($movies);
+        // die;
 
         require_once __DIR__ . '/../Views/movies/index.php';
     }
@@ -54,13 +46,14 @@ class MovieController
             'genre' => '',
         ];
 
+
         if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $_POST = filter_input_array(INPUT_POST, [
                 'title' => FILTER_SANITIZE_FULL_SPECIAL_CHARS,
                 'author' => FILTER_SANITIZE_FULL_SPECIAL_CHARS,
                 'available' => FILTER_DEFAULT,
                 'duration' => FILTER_SANITIZE_NUMBER_INT,
-                'genre' => FILTER_SANITIZE_FULL_SPECIAL_CHARS,
+                'genre' => FILTER_DEFAULT,
             ]);
             $imagePath = '';
             $allowedExtensions = ['jpg', 'jpeg', 'png', 'webp'];
@@ -115,7 +108,7 @@ class MovieController
 
             if (empty(array_filter($errors))) {
                 $genreEnum = \Models\Genre::from($genre);
-                $success = $this->movieModel->createMovie($title, $author, (int)$available, $imagePath, $duration, $genreEnum);
+                $success = Movie::createMovie($title, $author, (int)$available, $imagePath, $duration, $genreEnum);
 
                 if ($success) {
                     header("Location: /movies");
@@ -132,7 +125,7 @@ class MovieController
     {
         $this->checkAuth();
 
-        $movie = $this->movieModel->getOneMovie($id);
+        $movie = Movie::getOneMovie($id);
 
         if (!$movie) {
             header('Location: /books');
@@ -153,10 +146,10 @@ class MovieController
                 'author' => FILTER_SANITIZE_FULL_SPECIAL_CHARS,
                 'available' => FILTER_DEFAULT,
                 'duration' => FILTER_SANITIZE_NUMBER_INT,
-                'genre' => FILTER_SANITIZE_FULL_SPECIAL_CHARS,
+                'genre' => FILTER_DEFAULT,
             ]);
 
-            $imagePath = $movie['image'];
+            $imagePath = $movie->getImage();
             $allowedExtensions = ['jpg', 'jpeg', 'png', 'webp'];
 
             if (isset($_FILES['image']) && $_FILES['image']['error'] === UPLOAD_ERR_OK) {
@@ -207,7 +200,7 @@ class MovieController
 
             if (empty(array_filter($errors))) {
                 $genreEnum = \Models\Genre::from($genre);
-                $success = $this->movieModel->updateMovie($id, $title, $author, (int)$available, $imagePath, $duration, $genreEnum);
+                $success = Movie::updateMovie($id, $title, $author, (int)$available, $imagePath, $duration, $genreEnum);
 
                 if ($success) {
                     header("Location: /movies");
@@ -223,15 +216,15 @@ class MovieController
     public function delete(int $id): void
     {
         $this->checkAuth();
-        $movie = $this->movieModel->getOneMovie($id);
+        $movie = Movie::getOneMovie($id);
 
         if ($movie) {
 
-            $success = $this->movieModel->deleteMovie($id);
+            $success = Movie::deleteMovie($id);
 
             if ($success) {
-                if (!empty($movie['image'])) {
-                    $oldImagePath = __DIR__ . '/../' . $movie['image'];
+                if (!empty($movie->getImage())) {
+                    $oldImagePath = __DIR__ . '/../' . $movie->getImage();
                     if (file_exists($oldImagePath)) {
                         unlink($oldImagePath);
                     }

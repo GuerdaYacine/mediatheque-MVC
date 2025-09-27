@@ -2,42 +2,29 @@
 
 namespace Models;
 
+use Controllers\UserController;
 use PDO;
 use PDOStatement;
-use Database;
+use Database\Database;
 
 class User
 {
-    private $username;
-    private $email;
-    private $password;
-    private $createdAt;
-    private $updatedAt;
-    private PDO $pdo;
     private PDOStatement $statementCreateUser;
     private PDOStatement $statementUpdateUser;
     private PDOStatement $statementReadUserByEmail;
     private PDOStatement $statementReadUserById;
 
 
-    public function __construct(Database $db)
+    public function __construct(private int $id, private string $username, private string $email, private string $password, private ?string $createdAt, private ?string $updatedAt) {}
+
+    public function getId(): int
     {
-        $this->pdo = $db->connection;
+        return $this->id;
+    }
 
-        $this->statementCreateUser = $this->pdo->prepare(
-            "INSERT INTO users (username, email, password) VALUES (:username, :email, :password)"
-        );
-
-        $this->statementUpdateUser = $this->pdo->prepare(
-            "UPDATE users SET username = :username, email = :email, password = :password WHERE id = :id"
-        );
-
-        $this->statementReadUserByEmail = $this->pdo->prepare(
-            "SELECT * FROM users WHERE email = :email"
-        );
-        $this->statementReadUserById = $this->pdo->prepare(
-            "SELECT * FROM users WHERE id = :id"
-        );
+    public function setId(int $id): void
+    {
+        $this->id = $id;
     }
 
     public function getUsername(): string
@@ -90,39 +77,64 @@ class User
         $this->updatedAt = $updatedAt;
     }
 
-    public function createUser(string $username, string $email, string $password): bool
+    public static function createUser(string $username, string $email, string $password): bool
     {
+        $db = new Database();
+        $connexion = $db->connect();
+
+        $statementCreateUser = $connexion->prepare(
+            "INSERT INTO users (username, email, password) VALUES (:username, :email, :password)"
+        );
+
         $hashedPassword = password_hash($password, PASSWORD_ARGON2ID);
 
-        $this->statementCreateUser->bindParam(':username', $username);
-        $this->statementCreateUser->bindParam(':email', $email);
-        $this->statementCreateUser->bindParam(':password', $hashedPassword);
+        $statementCreateUser->bindParam(':username', $username);
+        $statementCreateUser->bindParam(':email', $email);
+        $statementCreateUser->bindParam(':password', $hashedPassword);
 
-        return $this->statementCreateUser->execute();
+        return $statementCreateUser->execute();
     }
 
-    public function updateUser(int $id, string $username, string $email, string $password): bool
+    public static function getUserById(int $id): ?User
     {
-        $hashedPassword = password_hash($password, PASSWORD_ARGON2ID);
+        $db = new Database();
+        $connexion = $db->connect();
 
-        $this->statementUpdateUser->bindParam(':id', $id);
-        $this->statementUpdateUser->bindParam(':username', $username);
-        $this->statementUpdateUser->bindParam(':email', $email);
-        $this->statementUpdateUser->bindParam(':password', $hashedPassword);
-        return $this->statementUpdateUser->execute();
+        $statementGetUserById = $connexion->prepare(
+            "SELECT * FROM users WHERE id = :id"
+        );
+        $statementGetUserById->bindParam(':id', $id);
+        $statementGetUserById->execute();
+        $user = $statementGetUserById->fetch();
+
+        if (!$user) {
+            return null;
+        }
+
+        $user = new User($user['id'], $user['username'], $user['email'], $user['password'], $user['created_at'], $user['updated_at']);
+
+        return $user;
     }
 
-    public function getUserById(int $id): array|false
+    public static function getUserByEmail(string $email): ?User
     {
-        $this->statementReadUserById->bindParam(':id', $id);
-        $this->statementReadUserById->execute();
-        return $this->statementReadUserById->fetch();
-    }
+        $db = new Database();
+        $connexion = $db->connect();
 
-    public function getUserByEmail(string $email): array|false
-    {
-        $this->statementReadUserByEmail->bindParam(':email', $email);
-        $this->statementReadUserByEmail->execute();
-        return $this->statementReadUserByEmail->fetch();
+        $statementGetUserByEmail = $connexion->prepare(
+            "SELECT * FROM users WHERE email = :email"
+        );
+
+        $statementGetUserByEmail->bindParam(':email', $email);
+        $statementGetUserByEmail->execute();
+        $user = $statementGetUserByEmail->fetch();
+
+        if (!$user) {
+            return null;
+        }
+
+        $user = new User($user['id'], $user['username'], $user['email'], $user['password'], $user['created_at'], $user['updated_at']);
+
+        return $user;
     }
 }

@@ -2,14 +2,12 @@
 
 namespace Models;
 
-use Database;
-use PDOStatement;
-use PDO;
+use \Database\Database;
 
 enum Genre: string
 {
     case Action = "Action";
-    case Comedie = "Comedie";
+    case Comedie = "Comédie";
     case Drame = "Drame";
     case Horreur = "Horreur";
     case Autre = "Autre";
@@ -17,84 +15,10 @@ enum Genre: string
 
 class Movie extends Media
 {
-    private int $duration;
-    private Genre $genre;
 
-    private PDOStatement $statementReadOneMovie;
-    private PDOStatement $statementReadAllMovie;
-    private PDOStatement $statementUpdateMovie;
-    private PDOStatement $statementDeleteMovie;
-    private PDOStatement $statementCreateMovie;
-    private PDOStatement $statementCreateMovieIntoMovie;
-    private PDOStatement $statementGetThreeRandomMovies;
-    private PDOStatement $statementGetAvailableMovies;
-    private PDOStatement $statementSearchMovies;
-    private PDO $pdo;
-
-    public function __construct(Database $db)
+    public function __construct(int $id, string $title, string $author, int $available, string $image, private int $duration, private Genre $genre)
     {
-        $this->pdo = $db->connection;
-
-        $this->statementReadAllMovie = $this->pdo->prepare(
-            "SELECT m.id, m.title, m.author, m.available, m.image, mo.duration, mo.genre
-            FROM media m
-            JOIN movie mo USING(id)
-            WHERE m.media_type = 'movie'"
-        );
-
-        $this->statementReadOneMovie = $this->pdo->prepare(
-            "SELECT m.id, m.title, m.author, m.available, m.image, mo.duration, mo.genre
-            FROM media m
-            JOIN movie mo USING(id)
-            WHERE m.id = :id AND m.media_type = 'movie'"
-        );
-
-        $this->statementUpdateMovie = $this->pdo->prepare(
-            "UPDATE media m
-            JOIN movie mo USING(id)
-            SET m.title = :title, m.author = :author, m.available = :available, m.image = :image, mo.duration = :duration, mo.genre = :genre
-            WHERE m.id = :id"
-        );
-
-        $this->statementDeleteMovie = $this->pdo->prepare(
-            "DELETE m, mo
-            FROM media m
-            JOIN movie mo USING(id)
-            WHERE m.id = :id"
-        );
-
-        $this->statementCreateMovie = $this->pdo->prepare(
-            "INSERT INTO media (title, author, available, image, media_type) VALUES (:title, :author, :available, :image, 'movie')"
-        );
-
-        $this->statementCreateMovieIntoMovie = $this->pdo->prepare(
-            "INSERT INTO movie (id, duration, genre) VALUES (:id, :duration, :genre)"
-        );
-
-        $this->statementGetThreeRandomMovies = $this->pdo->prepare(
-            "SELECT m.id, m.title, m.author, m.available, m.image, mo.duration, mo.genre
-            FROM media m
-            JOIN movie mo USING(id)
-            WHERE m.available = 1
-            ORDER BY RAND()
-            LIMIT 3
-            "
-        );
-
-        $this->statementGetAvailableMovies = $this->pdo->prepare(
-            "SELECT m.id, m.title, m.author, m.available, m.image, mo.duration, mo.genre
-            FROM media m
-            JOIN movie mo USING(id)
-            WHERE m.available = 1 
-            "
-        );
-
-        $this->statementSearchMovies = $this->pdo->prepare(
-            "SELECT m.id, m.title, m.author, m.available, m.image, mo.duration, mo.genre
-             FROM media m
-             JOIN movie mo USING(id)
-             WHERE m.title LIKE :search"
-        );
+        parent::__construct($id, $title, $author, $available, $image);
     }
 
     public function getDuration(): int
@@ -117,81 +41,163 @@ class Movie extends Media
         $this->genre = $genre;
     }
 
-    public function getAllMovies(): array
+    public static function getAllMovies(): array
     {
-        $this->statementReadAllMovie->execute();
-        return $this->statementReadAllMovie->fetchAll();
-    }
-
-    public function getOneMovie(int $id): array|false
-    {
-        $this->statementReadOneMovie->bindParam(':id', $id);
-        $this->statementReadOneMovie->execute();
-        return $this->statementReadOneMovie->fetch();
-    }
-
-    public function updateMovie(int $id, string $title, string $author, int $available, string $image, int $duration, Genre $genre): bool
-    {
-        $this->statementUpdateMovie->bindParam(':id', $id);
-        $this->statementUpdateMovie->bindParam(':title', $title);
-        $this->statementUpdateMovie->bindParam(':author', $author);
-        $this->statementUpdateMovie->bindParam(':available', $available);
-        $this->statementUpdateMovie->bindParam(':image', $image);
-        $this->statementUpdateMovie->bindParam(':duration', $duration);
-        $this->statementUpdateMovie->bindValue(':genre', $genre->value);
-        return $this->statementUpdateMovie->execute();
-    }
-
-    public function deleteMovie(int $id): bool
-    {
-        $this->statementDeleteMovie->bindParam(':id', $id);
-        return $this->statementDeleteMovie->execute();
-    }
-
-    public function createMovie(string $title, string $author, int $available, string $image, int $duration, Genre $genre): bool
-    {
-        $this->statementCreateMovie->bindParam(':title', $title);
-        $this->statementCreateMovie->bindParam(':author', $author);
-        $this->statementCreateMovie->bindParam(':available', $available);
-        $this->statementCreateMovie->bindParam(':image', $image);
-
-        $success = $this->statementCreateMovie->execute();
-        if (!$success) return false;
-
-        $id = $this->pdo->lastInsertId();
-
-        $this->statementCreateMovieIntoMovie->bindParam(':id', $id);
-        $this->statementCreateMovieIntoMovie->bindParam(':duration', $duration);
-        $this->statementCreateMovieIntoMovie->bindValue(':genre', $genre->value);
-
-        return $this->statementCreateMovieIntoMovie->execute();
-    }
-
-    public function getThreeRandomMovies(): array
-    {
-        $this->statementGetThreeRandomMovies->execute();
-        return $this->statementGetThreeRandomMovies->fetchAll();
-    }
-
-public function getAvailableMovies(?string $search = null): array
-{
-    if ($search) {
-        $this->statementSearchMovies->execute(['search' => '%' . $search . '%']);
-        return array_filter(
-            $this->statementSearchMovies->fetchAll(),
-            fn($movie) => $movie['available'] == 1
+        $db = new Database();
+        $connexion = $db->connect();
+        $statementReadAllMovies = $connexion->prepare(
+            "SELECT m.id, m.title, m.author, m.available, m.image, mo.duration, mo.genre
+            FROM media m
+            JOIN movie mo USING(id)"
         );
-    } else {
-        $this->statementGetAvailableMovies->execute();
-        return $this->statementGetAvailableMovies->fetchAll();
+        $statementReadAllMovies->execute();
+        $moviesDB = $statementReadAllMovies->fetchAll();
+        $movies = [];
+        foreach ($moviesDB as $movie) {
+            $movieInst = new Movie($movie['id'], $movie['title'], $movie['author'], $movie['available'], $movie['image'], $movie['duration'], Genre::from($movie['genre']));
+            array_push($movies, $movieInst);
+        }
+
+        return $movies;
     }
-}
 
-
-    public function searchMovies(string $search): array
+    public static function createMovie(string $title, string $author, int $available, string $image, int $duration, Genre $genre): bool
     {
-        $this->statementSearchMovies->execute(['search' => '%' . $search . '%']);
-        return $this->statementSearchMovies->fetchAll();
+        $db = new Database();
+        $connexion = $db->connect();
+
+        $statementCreateMovie = $connexion->prepare(
+            "INSERT INTO media (title, author, available, image) 
+            VALUES (:title, :author, :available, :image)"
+        );
+
+        $statementCreateMovieIntoMovie = $connexion->prepare(
+            "INSERT INTO movie (id, duration, genre) 
+            VALUES (:id, :duration, :genre)"
+        );
+
+        $statementCreateMovie->bindParam(':title', $title);
+        $statementCreateMovie->bindParam(':author', $author);
+        $statementCreateMovie->bindParam(':available', $available);
+        $statementCreateMovie->bindParam(':image', $image);
+
+        $success = $statementCreateMovie->execute();
+        if (!$success) {
+            return false;
+        }
+
+        $id = $connexion->lastInsertId();
+
+        $statementCreateMovieIntoMovie->bindParam(':id', $id);
+        $statementCreateMovieIntoMovie->bindParam(':duration', $duration);
+        $statementCreateMovieIntoMovie->bindValue(':genre', $genre->value);
+
+        return $statementCreateMovieIntoMovie->execute();
     }
 
+    public static function updateMovie(int $id, string $title, string $author, int $available, string $image, int $duration, Genre $genre): bool
+    {
+        $db = new Database();
+        $connexion = $db->connect();
+
+        $statementUpdateMovie = $connexion->prepare(
+            "UPDATE media m
+            JOIN movie mo USING(id)
+            SET m.title = :title, m.author = :author, m.available = :available, m.image = :image, mo.duration = :duration, mo.genre = :genre
+            WHERE m.id = :id"
+        );
+
+        $statementUpdateMovie->bindParam(':id', $id);
+        $statementUpdateMovie->bindParam(':title', $title);
+        $statementUpdateMovie->bindParam(':author', $author);
+        $statementUpdateMovie->bindParam(':available', $available);
+        $statementUpdateMovie->bindParam(':image', $image);
+        $statementUpdateMovie->bindParam(':duration', $duration);
+        $statementUpdateMovie->bindValue(':genre', $genre->value);
+
+        return $statementUpdateMovie->execute();
+    }
+
+    public static function getOneMovie(int $id): Movie
+    {
+        $db = new Database();
+        $connexion = $db->connect();
+
+        $statementReadOneMovie = $connexion->prepare(
+            "SELECT m.id, m.title, m.author, m.available, m.image, mo.duration, mo.genre
+            FROM media m
+            JOIN movie mo USING(id)
+            WHERE m.id = :id"
+        );
+
+        $statementReadOneMovie->bindParam(':id', $id);
+        $statementReadOneMovie->execute();
+        $movie = $statementReadOneMovie->fetch();
+
+        $movie = new Movie($movie['id'], $movie['title'], $movie['author'], $movie['available'], $movie['image'], $movie['duration'], Genre::from($movie['genre']));
+
+        return $movie;
+    }
+
+    public static function deleteMovie(int $id): bool
+    {
+        $db = new Database();
+        $connexion = $db->connect();
+
+        $statementDeleteMovie = $connexion->prepare(
+            "DELETE m, mo
+            FROM media m
+            JOIN movie mo USING(id)
+            WHERE m.id = :id"
+        );
+        $statementDeleteMovie->bindParam(':id', $id);
+        $success = $statementDeleteMovie->execute();
+        return $success;
+    }
+
+    public static function getThreeAvailableRandomMovies(): array
+    {
+        $db = new Database();
+        $connexion = $db->connect();
+
+        $statementGetThreeAvailableRandomMovies = $connexion->prepare(
+            "SELECT m.id, m.title, m.author, m.available, m.image, mo.duration, mo.genre
+            FROM media m
+            JOIN movie mo USING(id)
+            WHERE m.available = 1
+            ORDER BY RAND()
+            LIMIT 3
+            "
+        );
+        $statementGetThreeAvailableRandomMovies->execute();
+        $moviesDB = $statementGetThreeAvailableRandomMovies->fetchAll();
+        $movies = [];
+        foreach ($moviesDB as $movie) {
+            $movieInst = new Movie($movie['id'], $movie['title'], $movie['author'], $movie['available'], $movie['image'], $movie['duration'], Genre::from($movie['genre']));
+            array_push($movies, $movieInst);
+        }
+
+        return $movies;
+    }
+
+    // public function getAvailableMovies(?string $search = null): array
+    // {
+    //     if ($search) {
+    //         $this->statementSearchMovies->execute(['search' => '%' . $search . '%']);
+    //         return array_filter(
+    //             $this->statementSearchMovies->fetchAll(),
+    //             fn($movie) => $movie['available'] == 1
+    //         );
+    //     } else {
+    //         $this->statementGetAvailableMovies->execute();
+    //         return $this->statementGetAvailableMovies->fetchAll();
+    //     }
+    // }
+
+
+    // public function searchMovies(string $search): array
+    // {
+    //     $this->statementSearchMovies->execute(['search' => '%' . $search . '%']);
+    //     return $this->statementSearchMovies->fetchAll();
+    // }
 }

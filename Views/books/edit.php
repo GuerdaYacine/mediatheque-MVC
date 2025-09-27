@@ -25,12 +25,11 @@
                 <?php if (isset($error)) : ?>
                     <div class="general-error">
                         <i class="fas fa-exclamation-triangle"></i>
-                        <?= htmlspecialchars($error) ?>
+                        <?= $error ?>
                     </div>
                 <?php endif; ?>
 
                 <form action="" method="POST" enctype="multipart/form-data" class="edit-form">
-
                     <div class="form-group">
                         <label for="title">
                             <i class="fas fa-heading"></i>
@@ -40,7 +39,7 @@
                             name="title"
                             id="title"
                             class="form-input <?= $errors['title'] ? 'error' : '' ?>"
-                            value="<?= $title ?? $book['title'] ?>">
+                            value="<?= $title ?? $book->getTitle() ?>">
                         <?php if ($errors['title']) : ?>
                             <div class="error-message">
                                 <i class="fas fa-exclamation-circle"></i>
@@ -58,7 +57,7 @@
                             name="author"
                             id="author"
                             class="form-input <?= $errors['author'] ? 'error' : '' ?>"
-                            value="<?= $author ?? $book['author'] ?>">
+                            value="<?= $author ?? $book->getAuthor() ?>">
                         <?php if ($errors['author']) : ?>
                             <div class="error-message">
                                 <i class="fas fa-exclamation-circle"></i>
@@ -76,7 +75,7 @@
                             name="page_number"
                             id="page_number"
                             class="form-input <?= $errors['page_number'] ? 'error' : '' ?>"
-                            value="<?= $pageNumber ?? $book['page_number'] ?>"
+                            value="<?= $pageNumber ?? $book->getPageNumber() ?>"
                             min="1">
                         <?php if ($errors['page_number']) : ?>
                             <div class="error-message">
@@ -101,8 +100,8 @@
 
                         <div class="current-image-section">
                             <span class="current-image-label">Couverture actuelle :</span>
-                            <img src="<?= $book['image'] ?>"
-                                alt="Couverture actuelle du livre <?= $book['title'] ?>"
+                            <img src="<?= $book->getImage() ?>"
+                                alt="Couverture actuelle du livre <?= $book->getTitle() ?>"
                                 class="current-image">
                         </div>
 
@@ -125,7 +124,7 @@
                                     name="available"
                                     value="1"
                                     id="available_yes"
-                                    <?= (isset($available) ? ($available == 1) : $book['available']) ? 'checked' : '' ?>>
+                                    <?= (isset($available) ? ($available == 1) : $book->getAvailable() == 1) ? 'checked' : '' ?>>
                                 <label for="available_yes">Disponible</label>
                             </div>
                             <div class="radio-option">
@@ -133,7 +132,7 @@
                                     name="available"
                                     value="0"
                                     id="available_no"
-                                    <?= (isset($available) ? ($available == 0) : !$book['available']) ? 'checked' : '' ?>>
+                                    <?= (isset($available) ? ($available == 0) : $book->getAvailable() == 0) ? 'checked' : '' ?>>
                                 <label for="available_no">Indisponible</label>
                             </div>
                         </div>

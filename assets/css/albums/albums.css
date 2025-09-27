@@ -223,6 +223,7 @@
     font-size: 14px;
     transition: all 0.2s ease;
     border: 1px solid #e2e8f0;
+    gap: 6px;
 }
 
 .action-btn.view {

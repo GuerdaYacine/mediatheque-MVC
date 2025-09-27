@@ -58,39 +58,39 @@
                     <?php foreach ($albums as $album) : ?>
                         <div class="album-card">
                             <div class="album-image">
-                                <img src="<?= $album['image'] ?>" alt="<?= $album['title'] ?>">
-                                <div class="availability-badge <?= $album['available'] ? 'available' : 'unavailable' ?>">
-                                    <i class="fas <?= $album['available'] ? 'fa-check' : 'fa-times' ?>"></i>
-                                    <?= $album['available'] ? 'Disponible' : 'Indisponible' ?>
+                                <img src="<?= $album->getImage() ?>" alt="<?= $album->getTitle() ?>">
+                                <div class="availability-badge <?= $album->getAvailable() == 1 ? 'available' : 'unavailable' ?>">
+                                    <i class="fas <?= $album->getAvailable() == 1 ? 'fa-check' : 'fa-times' ?>"></i>
+                                    <?= $album->getAvailable() == 1 ? 'Disponible' : 'Indisponible' ?>
                                 </div>
                             </div>
 
                             <div class="album-info">
-                                <h3 class="album-title"><?= $album['title'] ?></h3>
+                                <h3 class="album-title"><?= $album->getTitle() ?></h3>
                                 <p class="album-author">
                                     <i class="fas fa-user"></i>
-                                    <?= $album['author'] ?>
+                                    <?= $album->getAuthor() ?>
                                 </p>
                                 <p class="album-editor">
                                     <i class="fas fa-building"></i>
-                                    <?= $album['editor'] ?>
+                                    <?= $album->getEditor() ?>
                                 </p>
                                 <p class="album-tracks">
                                     <i class="fas fa-music"></i>
-                                    <?= $album['track_number'] ?> piste<?= $album['track_number'] > 1 ? 's' : '' ?>
+                                    <?= $album->getTrackNumber($album->getId()) ?> piste<?= $album->getTrackNumber($album->getId()) > 1 ? 's' : '' ?>
                                 </p>
                             </div>
                             <?php if ($isLoggedIn) : ?>
                                 <div class="album-actions">
-                                    <a href="/albums/<?= $album['id'] ?>/borrow" class="action-btn view">
+                                    <a href="/albums/<?= $album->getId() ?>/borrow" class="action-btn view">
                                         <i class="fas fa-eye"></i>
                                         Emprunter
                                     </a>
-                                    <a href="/albums/<?= $album['id'] ?>/edit" class="action-btn edit">
+                                    <a href="/albums/<?= $album->getId() ?>/edit" class="action-btn edit">
                                         <i class="fas fa-edit"></i>
-                                        Modifer
+                                        Modifier
                                     </a>
-                                    <a href="/albums/<?= $album['id'] ?>/delete" class="action-btn delete">
+                                    <a href="/albums/<?= $album->getId() ?>/delete" class="action-btn delete">
                                         <i class="fas fa-trash"></i>
                                         Supprimer
                                     </a>

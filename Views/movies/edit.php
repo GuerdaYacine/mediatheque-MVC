@@ -25,7 +25,7 @@
                 <?php if (isset($error)) : ?>
                     <div class="general-error">
                         <i class="fas fa-exclamation-triangle"></i>
-                        <?= htmlspecialchars($error) ?>
+                        <?= $error ?>
                     </div>
                 <?php endif; ?>
 
@@ -39,9 +39,9 @@
                         <input type="text"
                             name="title"
                             id="title"
-                            class="form-input <?= $errors['title'] ? 'error' : '' ?>"
-                            value="<?= $title ?? $movie['title'] ?>">
-                        <?php if ($errors['title']) : ?>
+                            class="form-input <?= !empty($errors['title']) ? 'error' : '' ?>"
+                            value="<?= $title ?? $movie->getTitle() ?>">
+                        <?php if (!empty($errors['title'])) : ?>
                             <div class="error-message">
                                 <i class="fas fa-exclamation-circle"></i>
                                 <?= $errors['title'] ?>
@@ -57,9 +57,9 @@
                         <input type="text"
                             name="author"
                             id="author"
-                            class="form-input <?= $errors['author'] ? 'error' : '' ?>"
-                            value="<?= $author ?? $movie['author'] ?>">
-                        <?php if ($errors['author']) : ?>
+                            class="form-input <?= !empty($errors['author']) ? 'error' : '' ?>"
+                            value="<?= $author ?? $movie->getAuthor() ?>">
+                        <?php if (!empty($errors['author'])) : ?>
                             <div class="error-message">
                                 <i class="fas fa-exclamation-circle"></i>
                                 <?= $errors['author'] ?>
@@ -74,14 +74,14 @@
                         </label>
                         <select name="genre"
                             id="genre"
-                            class="form-select <?= isset($errors['genre']) && $errors['genre'] ? 'error' : '' ?>">
+                            class="form-select <?= !empty($errors['genre']) ? 'error' : '' ?>">
                             <?php foreach (\Models\Genre::cases() as $g): ?>
-                                <option value="<?= $g->value ?>" <?= isset($movie['genre']) && $movie['genre'] === $g->value ? 'selected' : '' ?>>
+                                <option value="<?= $g->value ?>" <?= ($movie->getGenre()->value === $g->value) ? 'selected' : '' ?>>
                                     <?= $g->value ?>
                                 </option>
                             <?php endforeach; ?>
                         </select>
-                        <?php if ($errors['genre']) : ?>
+                        <?php if (!empty($errors['genre'])) : ?>
                             <div class="error-message">
                                 <i class="fas fa-exclamation-circle"></i>
                                 <?= $errors['genre'] ?>
@@ -98,9 +98,9 @@
                             name="duration"
                             id="duration"
                             min="1"
-                            class="form-input <?= $errors['duration'] ? 'error' : '' ?>"
-                            value="<?= $duration ?? $movie['duration'] ?>">
-                        <?php if ($errors['duration']) : ?>
+                            class="form-input <?= !empty($errors['duration']) ? 'error' : '' ?>"
+                            value="<?= $duration ?? $movie->getDuration() ?>">
+                        <?php if (!empty($errors['duration'])) : ?>
                             <div class="error-message">
                                 <i class="fas fa-exclamation-circle"></i>
                                 <?= $errors['duration'] ?>
@@ -116,19 +116,19 @@
                         <input type="file"
                             name="image"
                             id="image"
-                            class="file-input <?= isset($errors['image']) && $errors['image'] ? 'error' : '' ?>">
+                            class="file-input <?= !empty($errors['image']) ? 'error' : '' ?>">
                         <div class="file-help">
                             Formats acceptés : JPG, PNG, WEBP
                         </div>
 
                         <div class="current-image-section">
                             <span class="current-image-label">Image actuelle :</span>
-                            <img src="<?= $movie['image'] ?>"
-                                alt="Image du film <?= $movie['title'] ?>"
+                            <img src="<?= $movie->getImage() ?>"
+                                alt="Image du film <?= $movie->getTitle() ?>"
                                 class="current-image">
                         </div>
 
-                        <?php if (isset($errors['image']) && $errors['image']) : ?>
+                        <?php if (!empty($errors['image'])) : ?>
                             <div class="error-message">
                                 <i class="fas fa-exclamation-circle"></i>
                                 <?= $errors['image'] ?>
@@ -141,13 +141,13 @@
                             <i class="fas fa-check-circle"></i>
                             Disponibilité
                         </label>
-                        <div class="radio-group <?= isset($errors['available']) && $errors['available'] ? 'error' : '' ?>">
+                        <div class="radio-group <?= !empty($errors['available']) ? 'error' : '' ?>">
                             <div class="radio-option">
                                 <input type="radio"
                                     name="available"
                                     value="1"
                                     id="available_yes"
-                                    <?= $movie['available'] == 1 ? 'checked' : '' ?>>
+                                    <?= $movie->getAvailable() == 1 ? 'checked' : '' ?>>
                                 <label for="available_yes">Disponible</label>
                             </div>
                             <div class="radio-option">
@@ -155,17 +155,18 @@
                                     name="available"
                                     value="0"
                                     id="available_no"
-                                    <?= $movie['available'] == 0 ? 'checked' : '' ?>>
+                                    <?= $movie->getAvailable() == 0 ? 'checked' : '' ?>>
                                 <label for="available_no">Indisponible</label>
                             </div>
                         </div>
-                        <?php if (isset($errors['available']) && $errors['available']) : ?>
+                        <?php if (!empty($errors['available'])) : ?>
                             <div class="error-message">
                                 <i class="fas fa-exclamation-circle"></i>
                                 <?= $errors['available'] ?>
                             </div>
                         <?php endif; ?>
                     </div>
+
 
                     <div class="form-actions">
                         <a href="/movies" class="btn btn-secondary">

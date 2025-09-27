@@ -6,13 +6,6 @@ use Models\Album;
 
 class AlbumController
 {
-    private Album $albumModel;
-
-    public function __construct(Album $albumModel)
-    {
-        $this->albumModel = $albumModel;
-    }
-
     private function checkAuth(): void
     {
         if (!isset($_SESSION['username'])) {
@@ -30,17 +23,11 @@ class AlbumController
     {
         $isLoggedIn = $this->isLoggedIn();
 
-        if(isset($_GET['filter']) && $_GET['filter'] === 'on'){
-            $albums = $this->albumModel->getAvailableAlbum();
-        }else{
-            $albums = $this->albumModel->getAllAlbums();
+        $albums = Album::getAllAlbums();
+
+        foreach ($albums as $album) {
+            $album->setTrackNumber(Album::getTrackNumber($album->getId()));
         }
-
-        foreach ($albums as $key => $album) {
-            $albums[$key]['track_number'] = $this->albumModel->getTrackNumber($album['id']);
-        }
-
-
 
         require_once __DIR__ . '/../Views/albums/index.php';
     }
@@ -111,7 +98,7 @@ class AlbumController
             }
 
             if (empty(array_filter($errors))) {
-                $success = $this->albumModel->createAlbum($title, $author, $editor, (int)$available, $imagePath);
+                $success = Album::createAlbum($title, $author, (int)$available, $imagePath, $editor);
 
                 if ($success) {
                     header('Location: /albums');
@@ -129,7 +116,7 @@ class AlbumController
     {
 
         $this->checkAuth();
-        $album = $this->albumModel->getOneAlbum($id);
+        $album = Album::getOneAlbum($id);
 
         if (!$album) {
             header('Location: /albums');
@@ -154,10 +141,8 @@ class AlbumController
                 'available' => FILTER_DEFAULT
             ]);
 
-            $imagePath = $album['image'];
+            $imagePath = $album->getImage();
             $allowedExtensions = ['jpg', 'jpeg', 'png', 'webp'];
-
-
             if (isset($_FILES['image']) && $_FILES['image']['error'] === UPLOAD_ERR_OK) {
                 $extension = strtolower(pathinfo($_FILES['image']['name'], PATHINFO_EXTENSION));
 
@@ -198,8 +183,7 @@ class AlbumController
             }
 
             if (empty(array_filter($errors))) {
-                $success = $this->albumModel->updateAlbum($id, $title, $author, $editor, (int)$available, $imagePath);
-
+                $success = Album::updateAlbum($id, $title, $author, (int)$available, $imagePath, $editor);
                 if ($success) {
                     header('Location: /albums');
                     exit;
@@ -216,20 +200,17 @@ class AlbumController
     public function delete(int $id): void
     {
         $this->checkAuth();
-        $album = $this->albumModel->getOneAlbum($id);
+        $album = Album::getOneAlbum($id);
 
         if ($album) {
-
-            $success = $this->albumModel->deleteAlbum($id);
-
+            $success = Album::deleteAlbum($id);
             if ($success) {
-                if (!empty($album['image'])) {
-                    $oldImagePath = __DIR__ . '/..' . $album['image'];
+                if (!empty($album->getImage())) {
+                    $oldImagePath = __DIR__ . '/..' . $album->getImage();
                     if (file_exists($oldImagePath)) {
                         unlink($oldImagePath);
                     }
                 }
-
                 header('Location: /albums');
                 exit;
             } else {

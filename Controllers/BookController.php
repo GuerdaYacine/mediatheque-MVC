@@ -6,13 +6,6 @@ use Models\Book;
 
 class BookController
 {
-    private Book $bookModel;
-
-    public function __construct(Book $bookModel)
-    {
-        $this->bookModel = $bookModel;
-    }
-
     private function checkAuth(): void
     {
         if (!isset($_SESSION['username'])) {
@@ -30,12 +23,8 @@ class BookController
     {
         $isLoggedIn = $this->isLoggedIn();
 
-        if(isset($_GET['filter']) && $_GET['filter'] === 'on'){
-            $books = $this->bookModel->getAvailableBooks();
-        }else{
-            $books = $this->bookModel->getAllBooks();
-        }
-        
+        $books = Book::getAllBooks();
+
         require_once __DIR__ . '/../Views/books/index.php';
     }
 
@@ -107,7 +96,7 @@ class BookController
             }
 
             if (empty(array_filter($errors))) {
-                $success = $this->bookModel->createBook($title, $author, $pageNumber, (int)$available, $imagePath);
+                $success = Book::createBook($title, $author, (int)$available, $imagePath, $pageNumber);
 
                 if ($success) {
                     header('Location: /books');
@@ -123,7 +112,7 @@ class BookController
     public function edit(int $id): void
     {
         $this->checkAuth();
-        $book = $this->bookModel->getOneBook($id);
+        $book = Book::getOneBook($id);
 
         if (!$book) {
             header('Location: /books');
@@ -146,7 +135,7 @@ class BookController
                 'page_number' => FILTER_SANITIZE_NUMBER_INT,
             ]);
 
-            $imagePath = $book['image'];
+            $imagePath = $book->getImage();
             $allowedExtensions = ['jpg', 'jpeg', 'png', 'webp'];
 
 
@@ -192,7 +181,7 @@ class BookController
             }
 
             if (empty(array_filter($errors))) {
-                $success = $this->bookModel->updateBook($id, $title, $author, $pageNumber, (int)$available, $imagePath);
+                $success = Book::updateBook($id, $title, $author, (int)$available, $imagePath, $pageNumber);
 
                 if ($success) {
                     header('Location: /books');
@@ -208,15 +197,15 @@ class BookController
     public function delete(int $id): void
     {
         $this->checkAuth();
-        $book = $this->bookModel->getOneBook($id);
+        $book = Book::getOneBook($id);
 
         if ($book) {
 
-            $success = $this->bookModel->deleteBook($id);
+            $success = Book::deleteBook($id);
 
             if ($success) {
-                if (!empty($book['image'])) {
-                    $oldImagePath = __DIR__ . '/../' . $book['image'];
+                if (!empty($book->getImage())) {
+                    $oldImagePath = __DIR__ . '/../' . $book->getImage();
                     if (file_exists($oldImagePath)) {
                         unlink($oldImagePath);
                     }

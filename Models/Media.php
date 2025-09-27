@@ -8,30 +8,16 @@ use Database;
 
 class Media
 {
+    public function __construct(private int $id, private string $title, private string $author, private int $available, private string $image) {}
 
-    private string $title;
-    private string $author;
-    private ?int $available = null;
-    private string $image;
-    private PDOStatement $statementBorrowMedia;
-    private PDOStatement $statementReturnMedia;
-    private PDO $pdo;
-
-
-    public function __construct(string $title, string $author, string $image, int $available, Database $db)
+    public function getId(): int
     {
-        $this->title = $title;
-        $this->author = $author;
-        $this->available = $available;
-        $this->image = $image;
-        $this->pdo = $db->connection;
+        return $this->id;
+    }
 
-        $this->statementBorrowMedia = $this->pdo->prepare(
-            "INSERT INTO location (user_id, media_id) VALUES (:user_id, :media_id)"
-        );
-        $this->statementReturnMedia = $this->pdo->prepare(
-            "UPDATE location SET return_date = NOW() WHERE user_id = :user_id AND media_id = :media_id"
-        );
+    public function setId(int $id): void
+    {
+        $this->id = $id;
     }
 
     public function getTitle(): string
@@ -54,9 +40,14 @@ class Media
         $this->author = $author;
     }
 
-    public function isAvailable(): ?bool
+    public function getAvailable(): int
     {
         return $this->available;
+    }
+
+    public function setAvailable(int $available): void
+    {
+        $this->available = $available;
     }
 
     public function getImage(): string
@@ -69,24 +60,24 @@ class Media
         $this->image = $image;
     }
 
-    public function borrow(int $userId, int $mediaId): bool
-    {
-        if ($this->available) {
-            $this->statementBorrowMedia->bindParam(':user_id', $userId);
-            $this->statementBorrowMedia->bindParam(':media_id', $mediaId);
-            $this->statementBorrowMedia->execute();
-            $this->available = 0;
-            return true;
-        } else {
-            return false;
-        }
-    }
+    // public function borrow(int $userId, int $mediaId): bool
+    // {
+    //     if ($this->available) {
+    //         $this->statementBorrowMedia->bindParam(':user_id', $userId);
+    //         $this->statementBorrowMedia->bindParam(':media_id', $mediaId);
+    //         $this->statementBorrowMedia->execute();
+    //         $this->available = 0;
+    //         return true;
+    //     } else {
+    //         return false;
+    //     }
+    // }
 
-    public function return(int $userId, int $mediaId): void
-    {
-        $this->statementReturnMedia->bindParam(':user_id', $userId);
-        $this->statementReturnMedia->bindParam(':media_id', $mediaId);
-        $this->statementReturnMedia->execute();
-        $this->available = 1;
-    }
+    // public function return(int $userId, int $mediaId): void
+    // {
+    //     $this->statementReturnMedia->bindParam(':user_id', $userId);
+    //     $this->statementReturnMedia->bindParam(':media_id', $mediaId);
+    //     $this->statementReturnMedia->execute();
+    //     $this->available = 1;
+    // }
 }

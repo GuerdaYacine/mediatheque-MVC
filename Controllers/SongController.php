@@ -7,15 +7,6 @@ use Models\Album;
 
 class SongController
 {
-    private Song $songModel;
-    private Album $albumModel;
-
-    public function __construct(Song $songModel, Album $albumModel)
-    {
-        $this->songModel = $songModel;
-        $this->albumModel = $albumModel;
-    }
-
     private function checkAuth(): void
     {
         if (!isset($_SESSION['username'])) {
@@ -32,18 +23,14 @@ class SongController
     public function show(): void
     {
         $isLoggedIn = $this->isLoggedIn();
-        if(isset($_GET['filter']) && $_GET['filter'] === 'on'){
-            $songs = $this->songModel->getAvailableSongs();
-        }else{
-            $songs = $this->songModel->getAllSongs();
-        }
+        $songs = Song::getAllSongs();
         require_once __DIR__ . '/../Views/songs/index.php';
     }
 
     public function create(): void
     {
         $this->checkAuth();
-        $albums = $this->albumModel->getAllAlbums();
+        $albums = Album::getAllAlbums();
 
         $errors = [
             'title' => '',
@@ -124,7 +111,8 @@ class SongController
             }
 
             if (empty(array_filter($errors))) {
-                if ($this->songModel->createSong($albumId, $title, $author, (int)$available, $imagePath, $duration, (int)$note)) {
+                $success = Song::createSong($albumId, $title, $author, (int)$available, $imagePath, $duration, (int)$note);
+                if ($success) {
                     header('Location: /songs');
                     exit;
                 } else {
@@ -138,14 +126,14 @@ class SongController
     public function edit(int $id): void
     {
         $this->checkAuth();
-        $song = $this->songModel->getOneSong($id);
+        $song = Song::getOneSong($id);
 
         if (!$song) {
             header('Location: /songs');
             exit;
         }
 
-        $albums = $this->albumModel->getAllAlbums();
+        $albums = Album::getAllAlbums();
 
         $errors = [
             'title' => '',
@@ -163,7 +151,7 @@ class SongController
                 'title' => FILTER_SANITIZE_FULL_SPECIAL_CHARS,
                 'author' => FILTER_SANITIZE_FULL_SPECIAL_CHARS,
                 'available' => FILTER_DEFAULT,
-                'duration' => FILTER_SANITIZE_NUMBER_FLOAT,
+                'duration' => FILTER_SANITIZE_NUMBER_INT,
                 'note' => FILTER_SANITIZE_NUMBER_INT,
                 'album_id' => FILTER_SANITIZE_NUMBER_INT
             ]);
@@ -197,10 +185,8 @@ class SongController
                 $errors['note'] = "La note doit être comprise entre 0 et 5";
             }
 
-            $imagePath = $song['image'];
-
+            $imagePath = $song->getImage();
             $allowedExtensions = ['jpg', 'jpeg', 'png', 'webp'];
-
             if (isset($_FILES['image']) && $_FILES['image']['error'] === UPLOAD_ERR_OK) {
 
                 $extension = strtolower(pathinfo($_FILES['image']['name'], PATHINFO_EXTENSION));
@@ -224,7 +210,8 @@ class SongController
             }
 
             if (empty(array_filter($errors))) {
-                if ($this->songModel->updateSong($id, $albumId, $title, $author, (int)$available, $imagePath, $duration, (int)$note)) {
+                $success = Song::updateSong($id, $albumId, $title, $author, (int)$available, $imagePath, $duration, $note);
+                if ($success) {
                     header('Location: /songs');
                     exit;
                 } else {
@@ -238,15 +225,15 @@ class SongController
     public function delete(int $id): void
     {
         $this->checkAuth();
-        $song = $this->songModel->getOneSong($id);
+        $song = Song::getOneSong($id);
 
         if ($song) {
 
-            $success = $this->songModel->deleteSong($id);
+            $success = Song::deleteSong($id);
 
             if ($success) {
-                if (!empty($song['image'])) {
-                    $oldImagePath = __DIR__ . '/../' . $song['image'];
+                if (!empty($song->getImage())) {
+                    $oldImagePath = __DIR__ . '/../' . $song->getImage();
                     if (file_exists($oldImagePath)) {
                         unlink($oldImagePath);
                     }

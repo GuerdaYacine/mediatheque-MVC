@@ -27,7 +27,7 @@
                 <?php endif; ?>
             </div>
 
-                        <div>
+            <div>
                 <h1>Filtrer</h1>
                 <form action="" method="get">
                     <label for="filter">Afficher seulement ceux disponibles</label>
@@ -55,18 +55,18 @@
                     <?php foreach ($songs as $song) : ?>
                         <div class="song-card">
                             <div class="song-image">
-                                <img src="<?= $song['image'] ?>"
-                                    alt="Image de la musique <?= $song['title'] ?>"
+                                <img src="<?= $song->getImage() ?>"
+                                    alt="Image de la musique <?= $song->getTitle() ?>"
                                     onerror="this.src='/assets/images/song-placeholder.jpg'">
 
-                                <div class="availability-badge <?= $song['available'] ? 'available' : 'unavailable' ?>">
-                                    <i class="fas <?= $song['available'] ? 'fa-check' : 'fa-times' ?>"></i>
-                                    <?= $song['available'] ? 'Disponible' : 'Indisponible' ?>
+                                <div class="availability-badge <?= $song->getAvailable() == 1 ? 'available' : 'unavailable' ?>">
+                                    <i class="fas <?= $song->getAvailable() == 1 ? 'fa-check' : 'fa-times' ?>"></i>
+                                    <?= $song->getAvailable() == 1 ? 'Disponible' : 'Indisponible' ?>
                                 </div>
 
                                 <?php
-                                $minutes = floor($song['duration'] / 60);
-                                $seconds = $song['duration'] % 60;
+                                $minutes = floor($song->getDuration() / 60);
+                                $seconds = $song->getDuration() % 60;
                                 ?>
                                 <div class="duration-badge">
                                     <i class="fas fa-clock"></i>
@@ -75,35 +75,31 @@
                             </div>
 
                             <div class="song-info">
-                                <h3 class="song-title"><?= $song['title'] ?></h3>
+                                <h3 class="song-title"><?= $song->getTitle() ?></h3>
 
                                 <p class="song-author">
                                     <i class="fas fa-microphone"></i>
-                                    <?= $song['author'] ?>
+                                    <?= $song->getAuthor() ?>
                                 </p>
 
                                 <p class="song-album">
                                     <i class="fas fa-compact-disc"></i>
-                                    Album : <a href="/albums" class="album-link"><?= $song['album_title'] ?? 'N/A' ?></a>
+                                    Album : <a href="/albums" class="album-link"><?= $song->getAlbumTitle() ?? 'N/A' ?></a>
                                 </p>
 
                                 <div class="song-note">
                                     <i class="fas fa-star"></i>
-                                    <?= $song['note'] ?>
+                                    <?= $song->getNote() ?>
                                 </div>
                             </div>
 
                             <?php if ($isLoggedIn) : ?>
                                 <div class="song-actions">
-                                    <a href="#" class="action-btn edit">
-                                        <i class="fas fa-eye"></i>
-                                        Emprunter
-                                    </a>
-                                    <a href="/songs/<?= $song['id'] ?>/edit" class="action-btn edit">
+                                    <a href="/songs/<?= $song->getId() ?>/edit" class="action-btn edit">
                                         <i class="fas fa-edit"></i>
                                         Modifier
                                     </a>
-                                    <a href="/songs/<?= $song['id'] ?>/delete" class="action-btn delete">
+                                    <a href="/songs/<?= $song->getId() ?>/delete" class="action-btn delete">
                                         <i class="fas fa-trash"></i>
                                         Supprimer
                                     </a>

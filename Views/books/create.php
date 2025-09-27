@@ -25,7 +25,7 @@
                 <?php if (isset($error)) : ?>
                     <div class="general-error">
                         <i class="fas fa-exclamation-triangle"></i>
-                        <?= htmlspecialchars($error) ?>
+                        <?= $error ?>
                     </div>
                 <?php endif; ?>
 

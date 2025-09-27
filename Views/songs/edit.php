@@ -40,7 +40,7 @@
                             name="title"
                             id="title"
                             class="form-input <?= $errors['title'] ? 'error' : '' ?>"
-                            value="<?= $title ?? $song['title'] ?>">
+                            value="<?= $title ?? $song->getTitle() ?>">
                         <?php if ($errors['title']) : ?>
                             <div class="error-message">
                                 <i class="fas fa-exclamation-circle"></i>
@@ -58,7 +58,7 @@
                             name="author"
                             id="author"
                             class="form-input <?= $errors['author'] ? 'error' : '' ?>"
-                            value="<?= $author ?? $song['author'] ?>">
+                            value="<?= $author ?? $song->getAuthor() ?>">
                         <?php if ($errors['author']) : ?>
                             <div class="error-message">
                                 <i class="fas fa-exclamation-circle"></i>
@@ -77,7 +77,7 @@
                                 name="duration"
                                 id="duration"
                                 class="form-input <?= $errors['duration'] ? 'error' : '' ?>"
-                                value="<?= $duration ?? $song['duration'] ?>"
+                                value="<?= $duration ?? $song->getDuration() ?>"
                                 min="1"
                                 step="1">
                             <div class="duration-help">
@@ -100,7 +100,7 @@
                                 name="note"
                                 id="note"
                                 class="form-input <?= $errors['note'] ? 'error' : '' ?>"
-                                value="<?= $note ?? $song['note'] ?>"
+                                value="<?= $note ?? $song->getNote() ?>"
                                 min="0"
                                 max="5">
                             <div class="note-help">
@@ -125,9 +125,9 @@
                             class="form-select <?= isset($errors['album']) && $errors['album'] ? 'error' : '' ?>">
                             <option value="">Sélectionner un album (laissez pour vide)</option>
                             <?php foreach ($albums as $album) : ?>
-                                <option value="<?= $album['id'] ?>"
-                                    <?= (isset($album_id) ? ($album_id == $album['id']) : ($song['album_id'] == $album['id'])) ? 'selected' : '' ?>>
-                                    <?= $album['title'] ?>
+                                <option value="<?= $album->getId() ?>"
+                                    <?= (isset($album_id) ? ($album_id == $album->getId()) : ($song->getAlbumId() == $album->getId())) ? 'selected' : '' ?>>
+                                    <?= $album->getTitle() ?>
                                 </option>
                             <?php endforeach; ?>
                         </select>
@@ -154,8 +154,8 @@
 
                         <div class="current-image-section">
                             <span class="current-image-label">Image actuelle :</span>
-                            <img src="<?= $song['image'] ?>"
-                                alt="Image actuelle de la musique <?= $song['title'] ?>"
+                            <img src="<?= $song->getImage() ?>"
+                                alt="Image actuelle de la musique <?= $song->getTitle() ?>"
                                 class="current-image">
                         </div>
 
@@ -178,7 +178,7 @@
                                     name="available"
                                     value="1"
                                     id="available_yes"
-                                    <?= (isset($available) ? ($available == 1) : $song['available']) ? 'checked' : '' ?>>
+                                    <?= (isset($available) ? ($available == 1) : $song->getAvailable() == 1) ? 'checked' : '' ?>>
                                 <label for="available_yes">Disponible</label>
                             </div>
                             <div class="radio-option">
@@ -186,7 +186,7 @@
                                     name="available"
                                     value="0"
                                     id="available_no"
-                                    <?= (isset($available) ? ($available == 0) : !$song['available']) ? 'checked' : '' ?>>
+                                    <?= (isset($available) ? ($available == 0) : $song->getAvailable() == 0) ? 'checked' : '' ?>>
                                 <label for="available_no">Indisponible</label>
                             </div>
                         </div>

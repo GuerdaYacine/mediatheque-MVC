@@ -1,6 +1,8 @@
 <?php
 require_once __DIR__ . '/vendor/autoload.php';
-require __DIR__ . '/Models/Database.php';
+require __DIR__ . '/Database/Database.php';
+
+use Database\Database;
 
 session_start();
 

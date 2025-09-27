@@ -29,7 +29,7 @@
                 <?php endif; ?>
             </div>
 
-                        <div>
+            <div>
                 <h1>Filtrer</h1>
                 <form action="" method="get">
                     <label for="filter">Afficher seulement ceux disponibles</label>
@@ -60,43 +60,44 @@
                     <?php foreach ($movies as $movie) : ?>
                         <div class="movie-card">
                             <div class="movie-image">
-                                <img src="<?= $movie['image'] ?>" alt="<?= $movie['title'] ?>">
-                                <div class="availability-badge <?= $movie['available'] ? 'available' : 'unavailable' ?>">
-                                    <i class="fas <?= $movie['available'] ? 'fa-check' : 'fa-times' ?>"></i>
-                                    <?= $movie['available'] ? 'Disponible' : 'Indisponible' ?>
+                                <img src="<?= $movie->getImage() ?>" alt="<?= $movie->getTitle() ?>">
+                                <div class="availability-badge <?= $movie->getAvailable() ? 'available' : 'unavailable' ?>">
+                                    <i class="fas <?= $movie->getAvailable() ? 'fa-check' : 'fa-times' ?>"></i>
+                                    <?= $movie->getAvailable() ? 'Disponible' : 'Indisponible' ?>
                                 </div>
                             </div>
 
                             <div class="movie-info">
-                                <h3 class="movie-title"><?= $movie['title'] ?></h3>
+                                <h3 class="movie-title"><?= $movie->getTitle() ?></h3>
                                 <p class="movie-author">
                                     <i class="fas fa-user-tie"></i>
-                                    <?= $movie['author'] ?>
+                                    <?= $movie->getAuthor() ?>
                                 </p>
                                 <p class="movie-genre">
                                     <i class="fas fa-theater-masks"></i>
-                                    <?= $movie['genre'] ?>
+                                    <?= $movie->getGenre()->value ?>
                                 </p>
                                 <p class="movie-duration">
                                     <i class="fas fa-clock"></i>
                                     <?php
-                                    $hours = intdiv($movie['duration'], 60);
-                                    $minutes = $movie['duration'] % 60;
+                                    $hours = intdiv($movie->getDuration(), 60);
+                                    $minutes = $movie->getDuration() % 60;
                                     ?>
                                     <?= $hours ?>h <?= $minutes ?>m
                                 </p>
                             </div>
+
                             <?php if ($isLoggedIn) : ?>
                                 <div class="movie-actions">
                                     <a href="#" class="action-btn view">
                                         <i class="fas fa-eye"></i>
                                         Emprunter
                                     </a>
-                                    <a href="/movies/<?= $movie['id'] ?>/edit" class="action-btn edit">
+                                    <a href="/movies/<?= $movie->getId() ?>/edit" class="action-btn edit">
                                         <i class="fas fa-edit"></i>
-                                        Modifer
+                                        Modifier
                                     </a>
-                                    <a href="/movies/<?= $movie['id'] ?>/delete" class="action-btn delete">
+                                    <a href="/movies/<?= $movie->getId() ?>/delete" class="action-btn delete">
                                         <i class="fas fa-trash"></i>
                                         Supprimer
                                     </a>

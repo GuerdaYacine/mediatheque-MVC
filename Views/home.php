@@ -30,7 +30,7 @@
                         <i class="fas fa-arrow-right"></i>
                     </a>
                 </div>
-                
+
                 <?php if (empty($albums)) : ?>
                     <div class="empty-message">
                         <i class="fas fa-images"></i>
@@ -38,28 +38,28 @@
                     </div>
                 <?php else : ?>
                     <div class="media-grid">
-                        <?php foreach($albums as $album) : ?>
+                        <?php foreach ($albums as $album) : ?>
                             <div class="media-card album-card">
                                 <div class="media-image">
-                                    <img src="<?=$album['image'] ?>" alt="<?= $album['title'] ?>">
-                                    <div class="availability-badge <?= $album['available'] ? 'available' : 'unavailable' ?>">
-                                        <i class="fas <?= $album['available'] ? 'fa-check' : 'fa-times' ?>"></i>
-                                        <?= $album['available'] ? 'Disponible' : 'Indisponible' ?>
+                                    <img src="<?= $album->getImage() ?>" alt="<?= $album->getTitle() ?>">
+                                    <div class="availability-badge <?= $album->getAvailable() == 1 ? 'available' : 'unavailable' ?>">
+                                        <i class="fas <?= $album->getAvailable() == 1 ? 'fa-check' : 'fa-times' ?>"></i>
+                                        <?= $album->getAvailable() == 1 ? 'Disponible' : 'Indisponible' ?>
                                     </div>
                                 </div>
                                 <div class="media-info">
-                                    <h3 class="media-title"><?= $album['title'] ?></h3>
+                                    <h3 class="media-title"><?= $album->getTitle() ?></h3>
                                     <p class="media-detail">
                                         <i class="fas fa-user"></i>
-                                        <?= $album['author'] ?>
+                                        <?= $album->getAuthor() ?>
                                     </p>
                                     <p class="media-detail">
                                         <i class="fas fa-building"></i>
-                                        <?= $album['editor'] ?>
+                                        <?= $album->getEditor() ?>
                                     </p>
                                     <p class="media-detail">
                                         <i class="fas fa-music"></i>
-                                        <?= $album['track_number'] ?> piste<?= $album['track_number'] > 1 ? 's' : '' ?>
+                                        <?= $album->getTrackNumber($album->getId()) ?> piste<?= $album->getTrackNumber($album->getId()) > 1 ? 's' : '' ?>
                                     </p>
                                 </div>
                             </div>
@@ -76,7 +76,7 @@
                         <i class="fas fa-arrow-right"></i>
                     </a>
                 </div>
-                
+
                 <?php if (empty($movies)) : ?>
                     <div class="empty-message">
                         <i class="fas fa-film"></i>
@@ -84,30 +84,30 @@
                     </div>
                 <?php else : ?>
                     <div class="media-grid">
-                        <?php foreach($movies as $movie) : ?>
+                        <?php foreach ($movies as $movie) : ?>
                             <div class="media-card movie-card">
                                 <div class="media-image">
-                                    <img src="<?= $movie['image'] ?>" alt="<?= $movie['title'] ?>">
-                                    <div class="availability-badge <?= $movie['available'] ? 'available' : 'unavailable' ?>">
-                                        <i class="fas <?= $movie['available'] ? 'fa-check' : 'fa-times' ?>"></i>
-                                        <?= $movie['available'] ? 'Disponible' : 'Indisponible' ?>
+                                    <img src="<?= $movie->getImage() ?>" alt="<?= $movie->getTitle() ?>">
+                                    <div class="availability-badge <?= $movie->getAvailable() == 1 ? 'available' : 'unavailable' ?>">
+                                        <i class="fas <?= $movie->getAvailable() == 1 ? 'fa-check' : 'fa-times' ?>"></i>
+                                        <?= $movie->getAvailable() == 1 ? 'Disponible' : 'Indisponible' ?>
                                     </div>
                                 </div>
                                 <div class="media-info">
-                                    <h3 class="media-title"><?= $movie['title'] ?></h3>
+                                    <h3 class="media-title"><?= $movie->getTitle() ?></h3>
                                     <p class="media-detail">
                                         <i class="fas fa-user-tie"></i>
-                                        <?= $movie['author'] ?>
+                                        <?= $movie->getAuthor() ?>
                                     </p>
                                     <p class="media-detail">
                                         <i class="fas fa-theater-masks"></i>
-                                        <?= $movie['genre'] ?>
+                                        <?= $movie->getGenre()->value ?>
                                     </p>
                                     <p class="media-detail">
                                         <i class="fas fa-clock"></i>
                                         <?php
-                                        $hours = intdiv($movie['duration'], 60);
-                                        $minutes = $movie['duration'] % 60;
+                                        $hours = intdiv($movie->getDuration(), 60);
+                                        $minutes = $movie->getDuration() % 60;
                                         ?>
                                         <?= $hours ?>h <?= $minutes ?>m
                                     </p>
@@ -126,7 +126,7 @@
                         <i class="fas fa-arrow-right"></i>
                     </a>
                 </div>
-                
+
                 <?php if (empty($books)) : ?>
                     <div class="empty-message">
                         <i class="fas fa-book-open"></i>
@@ -134,26 +134,26 @@
                     </div>
                 <?php else : ?>
                     <div class="media-grid">
-                        <?php foreach($books as $book) : ?>
+                        <?php foreach ($books as $book) : ?>
                             <div class="media-card book-card">
                                 <div class="media-image">
-                                    <img src="<?= $book['image'] ?>" 
-                                         alt="Couverture du livre <?= $book['title'] ?>"
-                                         onerror="this.src='/assets/images/book-placeholder.jpg'">
-                                    <div class="availability-badge <?= $book['available'] ? 'available' : 'unavailable' ?>">
-                                        <i class="fas <?= $book['available'] ? 'fa-check' : 'fa-times' ?>"></i>
-                                        <?= $book['available'] ? 'Disponible' : 'Indisponible' ?>
+                                    <img src="<?= $book->getImage() ?>"
+                                        alt="Couverture du livre <?= $book->getTitle() ?>"
+                                        onerror="this.src='/assets/images/book-placeholder.jpg'">
+                                    <div class="availability-badge <?= $book->getAvailable() == 1 ? 'available' : 'unavailable' ?>">
+                                        <i class="fas <?= $book->getAvailable() == 1 ? 'fa-check' : 'fa-times' ?>"></i>
+                                        <?= $book->getAvailable() == 1 ? 'Disponible' : 'Indisponible' ?>
                                     </div>
                                 </div>
                                 <div class="media-info">
-                                    <h3 class="media-title"><?= $book['title'] ?></h3>
+                                    <h3 class="media-title"><?= $book->getTitle() ?></h3>
                                     <p class="media-detail">
                                         <i class="fas fa-user-edit"></i>
-                                        <?= $book['author'] ?>
+                                        <?= $book->getAuthor() ?>
                                     </p>
                                     <p class="media-detail">
                                         <i class="fas fa-file-alt"></i>
-                                        <?= $book['page_number'] ?> page<?= $book['page_number'] > 1 ? 's' : '' ?>
+                                        <?= $book->getPageNumber() ?> page<?= $book->getPageNumber() > 1 ? 's' : '' ?>
                                     </p>
                                 </div>
                             </div>

@@ -55,24 +55,24 @@
                     <?php foreach ($books as $book) : ?>
                         <div class="book-card">
                             <div class="book-image">
-                                <img src="<?= $book['image'] ?>"
-                                    alt="Couverture du livre <?= $book['title'] ?>"
+                                <img src="<?= $book->getImage() ?>"
+                                    alt="Couverture du livre <?= $book->getTitle() ?>"
                                     onerror="this.src='/assets/images/book-placeholder.jpg'">
-                                <div class="availability-badge <?= $book['available'] ? 'available' : 'unavailable' ?>">
-                                    <i class="fas <?= $book['available'] ? 'fa-check' : 'fa-times' ?>"></i>
-                                    <?= $book['available'] ? 'Disponible' : 'Indisponible' ?>
+                                <div class="availability-badge <?= $book->getAvailable() == 1 ? 'available' : 'unavailable' ?>">
+                                    <i class="fas <?= $book->getAvailable() == 1 ? 'fa-check' : 'fa-times' ?>"></i>
+                                    <?= $book->getAvailable() == 1 ? 'Disponible' : 'Indisponible' ?>
                                 </div>
                             </div>
 
                             <div class="book-info">
-                                <h3 class="book-title"><?= $book['title'] ?></h3>
+                                <h3 class="book-title"><?= $book->getTitle() ?></h3>
                                 <p class="book-author">
                                     <i class="fas fa-user-edit"></i>
-                                    <?= $book['author'] ?>
+                                    <?= $book->getAuthor() ?>
                                 </p>
                                 <p class="book-pages">
                                     <i class="fas fa-file-alt"></i>
-                                    <?= $book['page_number'] ?> page<?= $book['page_number'] > 1 ? 's' : '' ?>
+                                    <?= $book->getPageNumber() ?> page<?= $book->getPageNumber() > 1 ? 's' : '' ?>
                                 </p>
                             </div>
 
@@ -82,11 +82,11 @@
                                         <i class="fas fa-eye"></i>
                                         Emprunter
                                     </a>
-                                    <a href="/books/<?= $book['id'] ?>/edit" class="action-btn edit">
+                                    <a href="/books/<?= $book->getId() ?>/edit" class="action-btn edit">
                                         <i class="fas fa-edit"></i>
                                         Modifier
                                     </a>
-                                    <a href="/books/<?= $book['id'] ?>/delete" class="action-btn delete">
+                                    <a href="/books/<?= $book->getId() ?>/delete" class="action-btn delete">
                                         <i class="fas fa-trash"></i>
                                         Supprimer
                                     </a>

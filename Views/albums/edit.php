@@ -40,7 +40,7 @@
                             name="title"
                             id="title"
                             class="form-input <?= $errors['title'] ? 'error' : '' ?>"
-                            value="<?= $title ?? $album['title'] ?>">
+                            value="<?= $title ?? $album->getTitle() ?>">
                         <?php if ($errors['title']) : ?>
                             <div class="error-message">
                                 <i class="fas fa-exclamation-circle"></i>
@@ -58,7 +58,7 @@
                             name="author"
                             id="author"
                             class="form-input <?= $errors['author'] ? 'error' : '' ?>"
-                            value="<?= $author ?? $album['author'] ?>">
+                            value="<?= $author ?? $album->getAuthor() ?>">
                         <?php if ($errors['author']) : ?>
                             <div class="error-message">
                                 <i class="fas fa-exclamation-circle"></i>
@@ -77,7 +77,7 @@
                             name="track_number"
                             id="track_number"
                             class="form-input disabled <?= $errors['track_number'] ? 'error' : '' ?>"
-                            value="<?= isset($trackNumber) ?? $album['track_number'] ?>">
+                            value="<?= isset($trackNumber) ?? $album->getTrackNumber($album->getId()) ?>">
                         <?php if ($errors['track_number']) : ?>
                             <div class="error-message">
                                 <i class="fas fa-exclamation-circle"></i>
@@ -95,7 +95,7 @@
                             name="editor"
                             id="editor"
                             class="form-input <?= $errors['editor'] ? 'error' : '' ?>"
-                            value="<?= $editor ?? $album['editor'] ?>">
+                            value="<?= $editor ?? $album->getEditor() ?>">
                         <?php if ($errors['editor']) : ?>
                             <div class="error-message">
                                 <i class="fas fa-exclamation-circle"></i>
@@ -119,8 +119,8 @@
 
                         <div class="current-image-section">
                             <span class="current-image-label">Image actuelle :</span>
-                            <img src="<?= $album['image'] ?>"
-                                alt="Image de l'album <?= $album['title'] ?>"
+                            <img src="<?= $album->getImage() ?>"
+                                alt="Image de l'album <?= $album->getTitle() ?>"
                                 class="current-image">
                         </div>
 
@@ -143,7 +143,7 @@
                                     name="available"
                                     value="1"
                                     id="available_yes"
-                                    <?= (isset($available) ? ($available == 1) : $album['available']) ? 'checked' : '' ?>>
+                                    <?= (isset($available) ? ($available == 1) : $album->getAvailable() == 1) ? 'checked' : '' ?>>
                                 <label for="available_yes">Disponible</label>
                             </div>
                             <div class="radio-option">
@@ -151,14 +151,14 @@
                                     name="available"
                                     value="0"
                                     id="available_no"
-                                    <?= (isset($available) ? ($available == 0) : !$album['available']) ? 'checked' : '' ?>>
+                                    <?= (isset($available) ? ($available == 0) : $album->getAvailable() == 0) ? 'checked' : '' ?>>
                                 <label for="available_no">Indisponible</label>
                             </div>
                         </div>
                         <?php if (isset($errors['available']) && $errors['available']) : ?>
                             <div class="error-message">
                                 <i class="fas fa-exclamation-circle"></i>
-                                <?= htmlspecialchars($errors['available']) ?>
+                                <?= $errors['available'] ?>
                             </div>
                         <?php endif; ?>
                     </div>

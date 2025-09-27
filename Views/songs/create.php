@@ -125,9 +125,9 @@
                             class="form-select <?= isset($errors['album']) && $errors['album'] ? 'error' : '' ?>">
                             <option value="">Sélectionner un album (laissez pour vide)</option>
                             <?php foreach ($albums as $album) : ?>
-                                <option value="<?= $album['id'] ?>"
-                                    <?= (isset($album_id) && $album_id == $album['id']) ? 'selected' : '' ?>>
-                                    <?= $album['title'] ?>
+                                <option value="<?= $album->getId() ?>"
+                                    <?= (isset($album_id) && $album_id == $album->getId()) ? 'selected' : '' ?>>
+                                    <?= $album->getTitle() ?>
                                 </option>
                             <?php endforeach; ?>
                         </select>

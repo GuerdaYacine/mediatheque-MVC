@@ -2,79 +2,14 @@
 
 namespace Models;
 
-use Database;
-use PDOStatement;
-use PDO;
+use \Database\Database;
 
 class Book extends Media
 {
-    private int $pageNumber;
-    private PDOStatement $statementReadOneBook;
-    private PDOStatement $statementReadAllBook;
-    private PDOStatement $statementUpdateBook;
-    private PDOStatement $statementDeleteBook;
-    private PDOStatement $statementCreateBook;
-    private PDOStatement $statementCreateBookIntoBook;
-    private PDOStatement $statementGetThreeRandomBooks;
-    private PDOStatement $statementGetAvailableBooks;
-    private PDO $pdo;
 
-    public function __construct(Database $db)
+    public function __construct(int $id, string $title, string $author, int $available, string $image, private int $pageNumber)
     {
-        $this->pdo = $db->connection;
-
-        $this->statementReadAllBook = $this->pdo->prepare(
-            "SELECT m.id, m.title, m.author, m.available, m.image, b.page_number
-        FROM media m
-        JOIN book b USING(id)
-        WHERE m.media_type = 'book'"
-        );
-
-        $this->statementReadOneBook = $this->pdo->prepare(
-            "SELECT m.id, m.title, m.author, m.available, m.image, b.page_number
-            FROM media m
-            JOIN book b USING(id)
-            WHERE m.id = :id AND m.media_type = 'book'"
-        );
-
-        $this->statementUpdateBook = $this->pdo->prepare(
-            "UPDATE media m
-            JOIN book b USING(id)
-            SET m.title = :title, m.author = :author, m.available = :available, m.image = :image, b.page_number = :page_number
-            WHERE m.id = :id"
-        );
-
-        $this->statementDeleteBook = $this->pdo->prepare(
-            "DELETE m, b
-            FROM media m
-            JOIN book b USING(id)
-            WHERE m.id = :id"
-        );
-
-        $this->statementCreateBook = $this->pdo->prepare(
-            "INSERT INTO media (title, author, available, image, media_type) VALUES (:title, :author, :available, :image, 'book')"
-        );
-
-        $this->statementCreateBookIntoBook = $this->pdo->prepare(
-            "INSERT INTO book (id, page_number) VALUES (:id, :page_number)"
-        );
-        $this->statementGetThreeRandomBooks = $this->pdo->prepare(
-            "SELECT m.id, m.title, m.author, m.available, m.image, b.page_number
-            FROM media m
-            JOIN book b USING(id)
-            WHERE m.available = 1
-            ORDER BY RAND()
-            LIMIT 3
-            "
-        );
-
-        $this->statementGetAvailableBooks = $this->pdo->prepare(
-            "SELECT m.id, m.title, m.author, m.available, m.image, b.page_number
-            FROM media m
-            JOIN book b USING(id)
-            WHERE m.available = 1
-            "
-        );
+        parent::__construct($id, $title, $author, $available, $image);
     }
 
     public function getPageNumber(): int
@@ -87,64 +22,140 @@ class Book extends Media
         $this->pageNumber = $pageNumber;
     }
 
-    public function getAllBooks(): array
+    public static function getAllBooks(): array
     {
-        $this->statementReadAllBook->execute();
-        return $this->statementReadAllBook->fetchAll();
+        $db = new Database();
+        $connexion = $db->connect();
+        $statementReadAllBooks = $connexion->prepare(
+            "SELECT m.id, m.title, m.author, m.available, m.image, b.page_number
+            FROM media m
+            JOIN book b USING(id)"
+        );
+        $statementReadAllBooks->execute();
+        $booksDB = $statementReadAllBooks->fetchAll();
+        $books = [];
+        foreach ($booksDB as $book) {
+            $bookInst = new Book($book['id'], $book['title'], $book['author'], $book['available'], $book['image'], $book['page_number']);
+            array_push($books, $bookInst);
+        }
+
+        return $books;
     }
 
-    public function getOneBook(int $id): array|false
+    public static function createBook(string $title, string $author, int $available, string $image, int $pageNumber): bool
     {
-        $this->statementReadOneBook->bindParam(':id', $id);
-        $this->statementReadOneBook->execute();
-        return $this->statementReadOneBook->fetch();
-    }
+        $db = new Database();
+        $connexion = $db->connect();
 
-    public function updateBook(int $id, string $title, string $author, int $pageNumber, int $available, string $image): bool
-    {
-        $this->statementUpdateBook->bindParam(':id', $id);
-        $this->statementUpdateBook->bindParam(':title', $title);
-        $this->statementUpdateBook->bindParam(':author', $author);
-        $this->statementUpdateBook->bindParam(':page_number', $pageNumber);
-        $this->statementUpdateBook->bindParam(':available', $available);
-        $this->statementUpdateBook->bindParam(':image', $image);
-        return $this->statementUpdateBook->execute();
-    }
+        $statementCreateBook = $connexion->prepare(
+            "INSERT INTO media (title, author, available, image) 
+            VALUES (:title, :author, :available, :image)"
+        );
 
-    public function deleteBook(int $id): bool
-    {
-        $this->statementDeleteBook->bindParam(':id', $id);
-        return $this->statementDeleteBook->execute();
-    }
+        $statementCreateBookIntoBook = $connexion->prepare(
+            "INSERT INTO book (id, page_number) 
+            VALUES (:id, :page_number)"
+        );
 
-    public function createBook(string $title, string $author, int $pageNumber, int $available, string $image): bool
-    {
-        $this->statementCreateBook->bindParam(':title', $title);
-        $this->statementCreateBook->bindParam(':author', $author);
-        $this->statementCreateBook->bindParam(':available', $available);
-        $this->statementCreateBook->bindParam(':image', $image);
-        $success = $this->statementCreateBook->execute();
+        $statementCreateBook->bindParam(':title', $title);
+        $statementCreateBook->bindParam(':author', $author);
+        $statementCreateBook->bindParam(':available', $available);
+        $statementCreateBook->bindParam(':image', $image);
 
+        $success = $statementCreateBook->execute();
         if (!$success) {
             return false;
         }
 
-        $id = $this->pdo->lastInsertId();
+        $id = $connexion->lastInsertId();
 
-        $this->statementCreateBookIntoBook->bindParam(':id', $id);
-        $this->statementCreateBookIntoBook->bindParam(':page_number', $pageNumber);
-        return $this->statementCreateBookIntoBook->execute();
+        $statementCreateBookIntoBook->bindParam(':id', $id);
+        $statementCreateBookIntoBook->bindParam(':page_number', $pageNumber);
+
+        return $statementCreateBookIntoBook->execute();
     }
 
-    public function getThreeRandomBooks(): array
+    public static function updateBook(int $id, string $title, string $author, int $available, string $image, int $pageNumber): bool
     {
-        $this->statementGetThreeRandomBooks->execute();
-        return $this->statementGetThreeRandomBooks->fetchAll();
+        $db = new Database();
+        $connexion = $db->connect();
+
+        $statementUpdateBook = $connexion->prepare(
+            "UPDATE media m
+            JOIN book b USING(id)
+            SET m.title = :title, m.author = :author, m.available = :available, m.image = :image, b.page_number = :page_number
+            WHERE m.id = :id"
+        );
+
+        $statementUpdateBook->bindParam(':id', $id);
+        $statementUpdateBook->bindParam(':title', $title);
+        $statementUpdateBook->bindParam(':author', $author);
+        $statementUpdateBook->bindParam(':available', $available);
+        $statementUpdateBook->bindParam(':image', $image);
+        $statementUpdateBook->bindParam(':page_number', $pageNumber);
+
+        return $statementUpdateBook->execute();
     }
 
-    public function getAvailableBooks():array
+    public static function getOneBook(int $id): Book
     {
-        $this->statementGetAvailableBooks->execute();
-        return $this->statementGetAvailableBooks->fetchAll();
+        $db = new Database();
+        $connexion = $db->connect();
+
+        $statementReadOneBook = $connexion->prepare(
+            "SELECT m.id, m.title, m.author, m.available, m.image, b.page_number
+            FROM media m
+            JOIN book b USING(id)
+            WHERE m.id = :id"
+        );
+
+        $statementReadOneBook->bindParam(':id', $id);
+        $statementReadOneBook->execute();
+        $book = $statementReadOneBook->fetch();
+
+        $book = new Book($book['id'], $book['title'], $book['author'], $book['available'], $book['image'], $book['page_number']);
+
+        return $book;
+    }
+
+    public static function deleteBook(int $id): bool
+    {
+        $db = new Database();
+        $connexion = $db->connect();
+
+        $statementDeleteBook = $connexion->prepare(
+            "DELETE m, b
+            FROM media m
+            JOIN book b USING(id)
+            WHERE m.id = :id"
+        );
+        $statementDeleteBook->bindParam(':id', $id);
+        $success = $statementDeleteBook->execute();
+        return $success;
+    }
+
+    public static function getThreeAvailableRandomBooks(): array
+    {
+        $db = new Database();
+        $connexion = $db->connect();
+
+        $statementGetThreeAvailableRandomBooks = $connexion->prepare(
+            "SELECT m.id, m.title, m.author, m.available, m.image, b.page_number
+            FROM media m
+            JOIN book b USING(id)
+            WHERE m.available = 1
+            ORDER BY RAND()
+            LIMIT 3
+            "
+        );
+        $statementGetThreeAvailableRandomBooks->execute();
+        $booksDB = $statementGetThreeAvailableRandomBooks->fetchAll();
+        $books = [];
+        foreach ($booksDB as $book) {
+            $bookInst = new Book($book['id'], $book['title'], $book['author'], $book['available'], $book['image'], $book['page_number']);
+            array_push($books, $bookInst);
+        }
+
+        return $books;
     }
 }
