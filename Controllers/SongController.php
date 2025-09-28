@@ -25,15 +25,15 @@ class SongController
         $isLoggedIn = $this->isLoggedIn();
 
         $search = $_GET['search'] ?? null;
-        
+
         $onlyAvailable = isset($_GET['available']) && $_GET['available'] === 'on';
 
         $songs = $onlyAvailable ? Song::getAvailableSongs() : Song::getAllSongs();
 
-        if($search){
+        if ($search) {
             $songs = Song::searchSongs($songs, $search);
         }
-        
+
         require_once __DIR__ . '/../Views/songs/index.php';
     }
 
@@ -205,13 +205,13 @@ class SongController
                     $fileName = time() . '_' . $_FILES['image']['name'];
                     $uploadDir = __DIR__ . '/../assets/images/song/';
 
-                    if (!is_dir($uploadDir)) {
-                        mkdir($uploadDir, 0755, true);
-                    }
-
                     $destination = $uploadDir . $fileName;
 
                     if (move_uploaded_file($_FILES['image']['tmp_name'], $destination)) {
+                        $oldImagePath = __DIR__ . '/../' . $song->getImage();
+                        if (file_exists($oldImagePath)) {
+                            unlink($oldImagePath);
+                        }
                         $imagePath = '/assets/images/song/' . $fileName;
                     }
                 } else {

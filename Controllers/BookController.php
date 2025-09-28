@@ -157,7 +157,7 @@ class BookController
                     $destination = $uploadDir . $fileName;
 
                     if (move_uploaded_file($_FILES['image']['tmp_name'], $destination)) {
-                        $oldImagePath = __DIR__ . '/../' . $book['image'];
+                        $oldImagePath = __DIR__ . '/../' . $book->getImage();
                         if (file_exists($oldImagePath)) {
                             unlink($oldImagePath);
                         }

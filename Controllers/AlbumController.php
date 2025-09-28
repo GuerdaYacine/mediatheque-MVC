@@ -161,7 +161,7 @@ class AlbumController
                     $destination = $uploadDir . $fileName;
 
                     if (move_uploaded_file($_FILES['image']['tmp_name'], $destination)) {
-                        $oldImagePath = __DIR__ . '/../' . $album['image'];
+                        $oldImagePath = __DIR__ . '/../' . $album->getImage();
                         if (file_exists($oldImagePath)) {
                             unlink($oldImagePath);
                         }

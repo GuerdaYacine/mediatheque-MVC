@@ -162,13 +162,13 @@ class MovieController
                     $fileName = time() . '_' . $_FILES['image']['name'];
                     $uploadDir = __DIR__ . '/../assets/images/movie/';
 
-                    if (!is_dir($uploadDir)) {
-                        mkdir($uploadDir, 0755, true);
-                    }
-
                     $destination = $uploadDir . $fileName;
 
                     if (move_uploaded_file($_FILES['image']['tmp_name'], $destination)) {
+                        $oldImagePath = __DIR__ . '/../' . $movie->getImage();
+                        if (file_exists($oldImagePath)) {
+                            unlink($oldImagePath);
+                        }
                         $imagePath = '/assets/images/movie/' . $fileName;
                     }
                 } else {

@@ -27,17 +27,14 @@
                 <?php endif; ?>
             </div>
 
-            <!-- Remplacez votre div de filtrage actuel par cette structure -->
             <div class="filter-section">
                 <h1>Filtrer</h1>
                 <form action="" method="get" class="filter-form">
-                    <!-- Barre de recherche en haut, pleine largeur -->
                     <div class="filter-group">
                         <label for="search">Recherche</label>
                         <input type="text" name="search" id="search" placeholder="Recherchez par titre ou auteur" class="filter-input">
                     </div>
 
-                    <!-- Ligne d'actions avec checkbox et boutons -->
                     <div class="filter-actions">
                         <div class="filter-group checkbox">
                             <input type="checkbox" name="available" id="filter" class="filter-checkbox">
@@ -47,7 +44,6 @@
                         <div style="display: flex; gap: 12px;">
                             <button type="submit" class="filter-btn">Filtrer</button>
 
-                            <!-- Optionnel : bouton pour réinitialiser les filtres -->
                             <button type="button" class="filter-reset" onclick="document.querySelector('.filter-form').reset(); window.location.href = window.location.pathname;">
                                 Effacer
                             </button>
