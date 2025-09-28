@@ -228,4 +228,46 @@ class BookController
             exit;
         }
     }
+
+    public function borrow(int $id){
+        $user_id = $_SESSION['user_id'] ?? null;
+
+        $book = Book::getOneBook($id);
+
+        if($book){
+            $success = Book::borrow($user_id, $id);
+
+            if($success){
+                header('Location: /books');
+                exit;
+            }else{
+                $error = "Impossible de louer le livre.";
+            }
+        }else{
+            header('Location: /books');
+            exit;
+        }
+    }
+
+    public function returnMedia(int $id)
+    {
+        $user_id = $_SESSION['user_id'] ?? null;
+
+        $book = Book::getOneBook($id);
+
+        if ($book) {
+            $success = Book::returnMedia($user_id, $id);
+
+            if ($success) {
+                header('Location: /books');
+                exit;
+            } else {
+                $error = "Impossible de rendre le livre.";
+            }
+        } else {
+            header('Location: /books');
+            exit;
+        }
+    }
+
 }

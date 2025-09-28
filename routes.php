@@ -22,6 +22,8 @@ $router->get('/books/{id}/edit', 'Controllers\BookController@edit');
 $router->post('/books/{id}/edit', 'Controllers\BookController@edit');
 $router->get('/books/{id}/delete', 'Controllers\BookController@delete');
 $router->post('/books/{id}/delete', 'Controllers\BookController@delete');
+$router->get('/books/{id}/borrow', 'Controllers\BookController@borrow');
+$router->get('/books/{id}/return', 'Controllers\BookController@returnMedia');
 
 // --------- Movie ---------
 $router->get('/movies', 'Controllers\MovieController@show');

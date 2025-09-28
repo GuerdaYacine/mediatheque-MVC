@@ -79,10 +79,26 @@
 
                             <?php if ($isLoggedIn) : ?>
                                 <div class="book-actions">
-                                    <a href="#" class="action-btn view">
-                                        <i class="fas fa-eye"></i>
-                                        Emprunter
-                                    </a>
+                                    <?php if ($book->getAvailable()) : ?>
+                                        <!-- Livre dispo -->
+                                        <a href="/books/<?= $book->getId() ?>/borrow" class="action-btn view">
+                                            <i class="fas fa-eye"></i>
+                                            Emprunter
+                                        </a>
+                                    <?php elseif ($book->getBorrowerId($book->getId()) === $_SESSION['user_id']) : ?>
+                                        <!-- Livre déjà emprunté par l'utilisateur -->
+                                        <a href="/books/<?= $book->getId() ?>/return" class="action-btn return">
+                                            <i class="fas fa-undo"></i>
+                                            Rendre
+                                        </a>
+                                    <?php else : ?>
+                                        <!-- Livre déjà emprunté par quelqu’un d’autre -->
+                                        <button class="action-btn view" disabled>
+                                            <i class="fas fa-eye"></i>
+                                            Emprunter (indisponible)
+                                        </button>
+                                    <?php endif; ?>
+
                                     <a href="/books/<?= $book->getId() ?>/edit" class="action-btn edit">
                                         <i class="fas fa-edit"></i>
                                         Modifier
