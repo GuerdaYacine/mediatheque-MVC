@@ -27,13 +27,32 @@
                 <?php endif; ?>
             </div>
 
-            <div>
+            <!-- Remplacez votre div de filtrage actuel par cette structure -->
+            <div class="filter-section">
                 <h1>Filtrer</h1>
-                <form action="" method="get">
-                    <label for="filter">Afficher seulement ceux disponibles</label>
-                    <input type="checkbox" name="available" id="filter">
-                    <input type="text" name="search" placeholder="Recherchez par titre ou auteur">
-                    <button>Filtrer</button>
+                <form action="" method="get" class="filter-form">
+                    <!-- Barre de recherche en haut, pleine largeur -->
+                    <div class="filter-group">
+                        <label for="search">Recherche</label>
+                        <input type="text" name="search" id="search" placeholder="Recherchez par titre ou auteur" class="filter-input">
+                    </div>
+
+                    <!-- Ligne d'actions avec checkbox et boutons -->
+                    <div class="filter-actions">
+                        <div class="filter-group checkbox">
+                            <input type="checkbox" name="available" id="filter" class="filter-checkbox">
+                            <label for="filter">Afficher seulement ceux disponibles</label>
+                        </div>
+
+                        <div style="display: flex; gap: 12px;">
+                            <button type="submit" class="filter-btn">Filtrer</button>
+
+                            <!-- Optionnel : bouton pour réinitialiser les filtres -->
+                            <button type="button" class="filter-reset" onclick="document.querySelector('.filter-form').reset(); window.location.href = window.location.pathname;">
+                                Effacer
+                            </button>
+                        </div>
+                    </div>
                 </form>
             </div>
 
@@ -80,19 +99,16 @@
                             <?php if ($isLoggedIn) : ?>
                                 <div class="book-actions">
                                     <?php if ($book->getAvailable()) : ?>
-                                        <!-- Livre dispo -->
                                         <a href="/books/<?= $book->getId() ?>/borrow" class="action-btn view">
                                             <i class="fas fa-eye"></i>
                                             Emprunter
                                         </a>
                                     <?php elseif ($book->getBorrowerId($book->getId()) === $_SESSION['user_id']) : ?>
-                                        <!-- Livre déjà emprunté par l'utilisateur -->
                                         <a href="/books/<?= $book->getId() ?>/return" class="action-btn return">
                                             <i class="fas fa-undo"></i>
                                             Rendre
                                         </a>
                                     <?php else : ?>
-                                        <!-- Livre déjà emprunté par quelqu’un d’autre -->
                                         <button class="action-btn view" disabled>
                                             <i class="fas fa-eye"></i>
                                             Emprunter (indisponible)

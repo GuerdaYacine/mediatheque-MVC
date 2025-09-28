@@ -24,12 +24,12 @@ class BookController
         $isLoggedIn = $this->isLoggedIn();
 
         $search = $_GET['search'] ?? null;
-        
+
         $onlyAvailable = isset($_GET['available']) && $_GET['available'] === 'on';
 
         $books = $onlyAvailable ? Book::getAvailableBooks() : Book::getAllBooks();
 
-        if($search){
+        if ($search) {
             $books = Book::searchBooks($books, $search);
         }
 
@@ -229,21 +229,23 @@ class BookController
         }
     }
 
-    public function borrow(int $id){
+    public function borrow(int $id)
+    {
+        $this->checkAuth();
         $user_id = $_SESSION['user_id'] ?? null;
 
         $book = Book::getOneBook($id);
 
-        if($book){
+        if ($book) {
             $success = Book::borrow($user_id, $id);
 
-            if($success){
+            if ($success) {
                 header('Location: /books');
                 exit;
-            }else{
+            } else {
                 $error = "Impossible de louer le livre.";
             }
-        }else{
+        } else {
             header('Location: /books');
             exit;
         }
@@ -251,6 +253,7 @@ class BookController
 
     public function returnMedia(int $id)
     {
+        $this->checkAuth();
         $user_id = $_SESSION['user_id'] ?? null;
 
         $book = Book::getOneBook($id);
@@ -269,5 +272,4 @@ class BookController
             exit;
         }
     }
-
 }

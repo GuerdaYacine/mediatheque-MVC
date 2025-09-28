@@ -27,15 +27,31 @@
                 <?php endif; ?>
             </div>
 
-            <div>
+            <div class="filter-section">
                 <h1>Filtrer</h1>
-                <form action="" method="get">
-                    <label for="filter">Afficher seulement ceux disponibles</label>
-                    <input type="checkbox" name="available" id="filter">
-                    <input type="text" name="search" placeholder="Rechercher par titre, auteur ou nom d'album">
-                    <button>Filtrer</button>
+                <form action="" method="get" class="filter-form">
+                    <div class="filter-group">
+                        <label for="search">Recherche</label>
+                        <input type="text" name="search" id="search" placeholder="Recherchez par titre ou auteur" class="filter-input">
+                    </div>
+
+                    <div class="filter-actions">
+                        <div class="filter-group checkbox">
+                            <input type="checkbox" name="available" id="filter" class="filter-checkbox">
+                            <label for="filter">Afficher seulement ceux disponibles</label>
+                        </div>
+
+                        <div style="display: flex; gap: 12px;">
+                            <button type="submit" class="filter-btn">Filtrer</button>
+
+                            <button type="button" class="filter-reset" onclick="document.querySelector('.filter-form').reset(); window.location.href = window.location.pathname;">
+                                Effacer
+                            </button>
+                        </div>
+                    </div>
                 </form>
             </div>
+
 
             <?php if (empty($songs)) : ?>
                 <div class="empty-state">

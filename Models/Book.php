@@ -4,197 +4,243 @@ namespace Models;
 
 use \Database\Database;
 
+/**
+ * Class Book
+ *
+ * Représente un livre dans la médiathèque.
+ * Hérite de Media et ajoute la propriété pageNumber.
+ */
 class Book extends Media
 {
+    /** @var int Nombre de pages du livre */
+    private int $pageNumber;
 
-    public function __construct(int $id, string $title, string $author, int $available, string $image, private int $pageNumber)
+    /**
+     * Constructeur de la classe Book
+     *
+     * @param int $id
+     * @param string $title
+     * @param string $author
+     * @param int $available
+     * @param string $image
+     * @param int $pageNumber
+     */
+    public function __construct(int $id, string $title, string $author, int $available, string $image, int $pageNumber)
     {
         parent::__construct($id, $title, $author, $available, $image);
+        $this->pageNumber = $pageNumber;
     }
+
+    // ------------------- Getters et Setters -------------------
 
     public function getPageNumber(): int
     {
         return $this->pageNumber;
     }
-
     public function setPageNumber(int $pageNumber): void
     {
         $this->pageNumber = $pageNumber;
     }
 
+    // ------------------- Méthodes statiques -------------------
+
+    /** Récupère tous les livres */
     public static function getAllBooks(): array
     {
         $db = new Database();
         $connexion = $db->connect();
-        $statementReadAllBooks = $connexion->prepare(
+        $stmt = $connexion->prepare(
             "SELECT m.id, m.title, m.author, m.available, m.image, b.page_number
-            FROM media m
-            JOIN book b USING(id)"
+             FROM media m
+             JOIN book b USING(id)"
         );
-        $statementReadAllBooks->execute();
-        $booksDB = $statementReadAllBooks->fetchAll();
+        $stmt->execute();
+        $booksDB = $stmt->fetchAll();
+
         $books = [];
         foreach ($booksDB as $book) {
-            $bookInst = new Book($book['id'], $book['title'], $book['author'], $book['available'], $book['image'], $book['page_number']);
-            array_push($books, $bookInst);
+            $books[] = new Book(
+                $book['id'],
+                $book['title'],
+                $book['author'],
+                $book['available'],
+                $book['image'],
+                $book['page_number']
+            );
         }
 
         return $books;
     }
 
+    /** Crée un nouveau livre */
     public static function createBook(string $title, string $author, int $available, string $image, int $pageNumber): bool
     {
         $db = new Database();
         $connexion = $db->connect();
 
-        $statementCreateBook = $connexion->prepare(
-            "INSERT INTO media (title, author, available, image) 
-            VALUES (:title, :author, :available, :image)"
+        $stmtMedia = $connexion->prepare(
+            "INSERT INTO media (title, author, available, image) VALUES (:title, :author, :available, :image)"
         );
+        $stmtMedia->bindParam(':title', $title);
+        $stmtMedia->bindParam(':author', $author);
+        $stmtMedia->bindParam(':available', $available);
+        $stmtMedia->bindParam(':image', $image);
 
-        $statementCreateBookIntoBook = $connexion->prepare(
-            "INSERT INTO book (id, page_number) 
-            VALUES (:id, :page_number)"
-        );
-
-        $statementCreateBook->bindParam(':title', $title);
-        $statementCreateBook->bindParam(':author', $author);
-        $statementCreateBook->bindParam(':available', $available);
-        $statementCreateBook->bindParam(':image', $image);
-
-        $success = $statementCreateBook->execute();
-        if (!$success) {
+        if (!$stmtMedia->execute()) {
             return false;
         }
 
         $id = $connexion->lastInsertId();
 
-        $statementCreateBookIntoBook->bindParam(':id', $id);
-        $statementCreateBookIntoBook->bindParam(':page_number', $pageNumber);
+        $stmtBook = $connexion->prepare(
+            "INSERT INTO book (id, page_number) VALUES (:id, :page_number)"
+        );
+        $stmtBook->bindParam(':id', $id);
+        $stmtBook->bindParam(':page_number', $pageNumber);
 
-        return $statementCreateBookIntoBook->execute();
+        return $stmtBook->execute();
     }
 
+    /** Met à jour un livre existant */
     public static function updateBook(int $id, string $title, string $author, int $available, string $image, int $pageNumber): bool
     {
         $db = new Database();
         $connexion = $db->connect();
 
-        $statementUpdateBook = $connexion->prepare(
+        $stmt = $connexion->prepare(
             "UPDATE media m
-            JOIN book b USING(id)
-            SET m.title = :title, m.author = :author, m.available = :available, m.image = :image, b.page_number = :page_number
-            WHERE m.id = :id"
+             JOIN book b USING(id)
+             SET m.title = :title, m.author = :author, m.available = :available, m.image = :image, b.page_number = :page_number
+             WHERE m.id = :id"
         );
 
-        $statementUpdateBook->bindParam(':id', $id);
-        $statementUpdateBook->bindParam(':title', $title);
-        $statementUpdateBook->bindParam(':author', $author);
-        $statementUpdateBook->bindParam(':available', $available);
-        $statementUpdateBook->bindParam(':image', $image);
-        $statementUpdateBook->bindParam(':page_number', $pageNumber);
+        $stmt->bindParam(':id', $id);
+        $stmt->bindParam(':title', $title);
+        $stmt->bindParam(':author', $author);
+        $stmt->bindParam(':available', $available);
+        $stmt->bindParam(':image', $image);
+        $stmt->bindParam(':page_number', $pageNumber);
 
-        return $statementUpdateBook->execute();
+        return $stmt->execute();
     }
 
+    /** Récupère un livre spécifique */
     public static function getOneBook(int $id): Book
     {
         $db = new Database();
         $connexion = $db->connect();
 
-        $statementReadOneBook = $connexion->prepare(
+        $stmt = $connexion->prepare(
             "SELECT m.id, m.title, m.author, m.available, m.image, b.page_number
-            FROM media m
-            JOIN book b USING(id)
-            WHERE m.id = :id"
+             FROM media m
+             JOIN book b USING(id)
+             WHERE m.id = :id"
         );
+        $stmt->bindParam(':id', $id);
+        $stmt->execute();
+        $book = $stmt->fetch();
 
-        $statementReadOneBook->bindParam(':id', $id);
-        $statementReadOneBook->execute();
-        $book = $statementReadOneBook->fetch();
-
-        $book = new Book($book['id'], $book['title'], $book['author'], $book['available'], $book['image'], $book['page_number']);
-
-        return $book;
+        return new Book(
+            $book['id'],
+            $book['title'],
+            $book['author'],
+            $book['available'],
+            $book['image'],
+            $book['page_number']
+        );
     }
 
+    /** Supprime un livre */
     public static function deleteBook(int $id): bool
     {
         $db = new Database();
         $connexion = $db->connect();
 
-        $statementDeleteBook = $connexion->prepare(
+        $stmt = $connexion->prepare(
             "DELETE m, b
-            FROM media m
-            JOIN book b USING(id)
-            WHERE m.id = :id"
+             FROM media m
+             JOIN book b USING(id)
+             WHERE m.id = :id"
         );
-        $statementDeleteBook->bindParam(':id', $id);
-        $success = $statementDeleteBook->execute();
-        return $success;
+        $stmt->bindParam(':id', $id);
+
+        return $stmt->execute();
     }
 
+    /** Récupère 3 livres disponibles aléatoires */
     public static function getThreeAvailableRandomBooks(): array
     {
         $db = new Database();
         $connexion = $db->connect();
 
-        $statementGetThreeAvailableRandomBooks = $connexion->prepare(
+        $stmt = $connexion->prepare(
             "SELECT m.id, m.title, m.author, m.available, m.image, b.page_number
-            FROM media m
-            JOIN book b USING(id)
-            WHERE m.available = 1
-            ORDER BY RAND()
-            LIMIT 3
-            "
+             FROM media m
+             JOIN book b USING(id)
+             WHERE m.available = 1
+             ORDER BY RAND()
+             LIMIT 3"
         );
-        $statementGetThreeAvailableRandomBooks->execute();
-        $booksDB = $statementGetThreeAvailableRandomBooks->fetchAll();
+        $stmt->execute();
+        $booksDB = $stmt->fetchAll();
+
         $books = [];
         foreach ($booksDB as $book) {
-            $bookInst = new Book($book['id'], $book['title'], $book['author'], $book['available'], $book['image'], $book['page_number']);
-            array_push($books, $bookInst);
+            $books[] = new Book(
+                $book['id'],
+                $book['title'],
+                $book['author'],
+                $book['available'],
+                $book['image'],
+                $book['page_number']
+            );
         }
 
         return $books;
     }
 
+    /** Récupère tous les livres disponibles */
     public static function getAvailableBooks(): array
     {
         $db = new Database();
         $connexion = $db->connect();
 
-        $statementGetAvailableBooks = $connexion->prepare(
+        $stmt = $connexion->prepare(
             "SELECT m.id, m.title, m.author, m.available, m.image, b.page_number
-            FROM media m
-            JOIN book b USING(id)
-            WHERE m.available = 1"
+             FROM media m
+             JOIN book b USING(id)
+             WHERE m.available = 1"
         );
-        $statementGetAvailableBooks->execute();
-        $booksDB = $statementGetAvailableBooks->fetchAll();
+        $stmt->execute();
+        $booksDB = $stmt->fetchAll();
+
         $books = [];
         foreach ($booksDB as $book) {
-            $bookInst = new Book($book['id'], $book['title'], $book['author'], $book['available'], $book['image'], $book['page_number']);
-            array_push($books, $bookInst);
+            $books[] = new Book(
+                $book['id'],
+                $book['title'],
+                $book['author'],
+                $book['available'],
+                $book['image'],
+                $book['page_number']
+            );
         }
 
         return $books;
     }
 
-        public static function searchBooks(array $books, string $search): array
+    /** Recherche des livres par titre ou auteur */
+    public static function searchBooks(array $books, string $search): array
     {
         $search = mb_strtolower(trim($search));
 
         return array_values(
-            array_filter($books, function (Book $books) use ($search) {
-                $title  = mb_strtolower($books->getTitle() ?? '');
-                $author = mb_strtolower($books->getAuthor() ?? '');
+            array_filter($books, function (Book $book) use ($search) {
+                $title  = mb_strtolower($book->getTitle() ?? '');
+                $author = mb_strtolower($book->getAuthor() ?? '');
 
-                return str_contains($title, $search) ||
-                    str_contains($author, $search);
+                return str_contains($title, $search) || str_contains($author, $search);
             })
         );
     }
-
-
 }

@@ -4,204 +4,257 @@ namespace Models;
 
 use \Database\Database;
 
+/**
+ * Class Album
+ *
+ * Représente un album dans la médiathèque.
+ * Hérite de Media et ajoute la propriété editor et le nombre de pistes.
+ */
 class Album extends Media
 {
+    /** @var string Nom de l'éditeur */
+    private string $editor;
+
+    /** @var int|null Nombre de pistes dans l'album */
     private ?int $trackNumber = null;
 
-    public function __construct(int $id, string $title, string $author, int $available, string $image, private string $editor)
+    /**
+     * Constructeur de la classe Album
+     *
+     * @param int $id
+     * @param string $title
+     * @param string $author
+     * @param int $available
+     * @param string $image
+     * @param string $editor
+     */
+    public function __construct(int $id, string $title, string $author, int $available, string $image, string $editor)
     {
         parent::__construct($id, $title, $author, $available, $image);
+        $this->editor = $editor;
     }
+
+    // ------------------- Getters et Setters -------------------
 
     public function getEditor(): string
     {
         return $this->editor;
     }
-
     public function setEditor(string $editor): void
     {
         $this->editor = $editor;
     }
 
-    public static function getTrackNumber(int $albumId): int
+    public function getTrackNumber(): ?int
     {
-        $db = new Database();
-        $connexion = $db->connect();
-        $statementCountTracks = $connexion->prepare(
-            "SELECT COUNT(*) 
-         FROM song 
-         WHERE album_id = :id AND available = 1"
-        );
-        $statementCountTracks->bindParam(':id', $albumId);
-        $statementCountTracks->execute();
-        return (int) $statementCountTracks->fetchColumn();
+        return $this->trackNumber;
     }
-
     public function setTrackNumber(int $trackNumber): void
     {
         $this->trackNumber = $trackNumber;
     }
 
+    /** Récupère le nombre de pistes disponibles pour un album donné */
+    public static function countTracks(int $albumId): int
+    {
+        $db = new Database();
+        $connexion = $db->connect();
+        $stmt = $connexion->prepare(
+            "SELECT COUNT(*) FROM song WHERE album_id = :id AND available = 1"
+        );
+        $stmt->bindParam(':id', $albumId);
+        $stmt->execute();
 
+        return (int) $stmt->fetchColumn();
+    }
+
+    // ------------------- Méthodes CRUD -------------------
+
+    /** Récupère tous les albums */
     public static function getAllAlbums(): array
     {
         $db = new Database();
         $connexion = $db->connect();
-        $statementReadAllAlbums = $connexion->prepare(
+
+        $stmt = $connexion->prepare(
             "SELECT m.id, m.title, m.author, m.available, m.image, a.editor
-              FROM media m
-              JOIN album a USING(id)"
+             FROM media m
+             JOIN album a USING(id)"
         );
-        $statementReadAllAlbums->execute();
-        $albumsDB = $statementReadAllAlbums->fetchAll();
+        $stmt->execute();
+        $albumsDB = $stmt->fetchAll();
+
         $albums = [];
         foreach ($albumsDB as $album) {
-            $albumInst = new Album($album['id'], $album['title'], $album['author'], $album['available'], $album['image'], $album['editor']);
-            array_push($albums, $albumInst);
+            $albums[] = new Album(
+                $album['id'],
+                $album['title'],
+                $album['author'],
+                $album['available'],
+                $album['image'],
+                $album['editor']
+            );
         }
+
         return $albums;
     }
 
+    /** Crée un nouvel album */
     public static function createAlbum(string $title, string $author, int $available, string $image, string $editor): bool
     {
         $db = new Database();
         $connexion = $db->connect();
 
-        $statementCreateAlbum = $connexion->prepare(
-            "INSERT INTO media (title, author, available, image) 
-            VALUES (:title, :author, :available, :image)"
+        $stmtMedia = $connexion->prepare(
+            "INSERT INTO media (title, author, available, image) VALUES (:title, :author, :available, :image)"
         );
+        $stmtMedia->bindParam(':title', $title);
+        $stmtMedia->bindParam(':author', $author);
+        $stmtMedia->bindParam(':available', $available);
+        $stmtMedia->bindParam(':image', $image);
 
-        $statementCreateAlbulIntoAlbum = $connexion->prepare(
-            "INSERT INTO album (id, editor)
-            VALUES (:id, :editor)"
-        );
-
-        $statementCreateAlbum->bindParam(':title', $title);
-        $statementCreateAlbum->bindParam(':author', $author);
-        $statementCreateAlbum->bindParam(':available', $available);
-        $statementCreateAlbum->bindParam(':image', $image);
-
-        $success = $statementCreateAlbum->execute();
-        if (!$success) {
-            return false;
-        }
+        if (!$stmtMedia->execute()) return false;
 
         $id = $connexion->lastInsertId();
 
-        $statementCreateAlbulIntoAlbum->bindParam(':id', $id);
-        $statementCreateAlbulIntoAlbum->bindParam(':editor', $editor);
+        $stmtAlbum = $connexion->prepare(
+            "INSERT INTO album (id, editor) VALUES (:id, :editor)"
+        );
+        $stmtAlbum->bindParam(':id', $id);
+        $stmtAlbum->bindParam(':editor', $editor);
 
-        return $statementCreateAlbulIntoAlbum->execute();
+        return $stmtAlbum->execute();
     }
 
+    /** Met à jour un album existant */
     public static function updateAlbum(int $id, string $title, string $author, int $available, string $image, string $editor): bool
     {
         $db = new Database();
         $connexion = $db->connect();
 
-        $statementUpdateAlbum = $connexion->prepare(
+        $stmt = $connexion->prepare(
             "UPDATE media m
-              JOIN album a USING(id)
-              SET m.title = :title, m.author = :author, m.available = :available, m.image = :image, a.editor = :editor
-              WHERE m.id = :id"
+             JOIN album a USING(id)
+             SET m.title = :title, m.author = :author, m.available = :available, m.image = :image, a.editor = :editor
+             WHERE m.id = :id"
         );
 
-        $statementUpdateAlbum->bindParam(':id', $id);
-        $statementUpdateAlbum->bindParam(':title', $title);
-        $statementUpdateAlbum->bindParam(':author', $author);
-        $statementUpdateAlbum->bindParam(':available', $available);
-        $statementUpdateAlbum->bindParam(':image', $image);
-        $statementUpdateAlbum->bindParam(':editor', $editor);
+        $stmt->bindParam(':id', $id);
+        $stmt->bindParam(':title', $title);
+        $stmt->bindParam(':author', $author);
+        $stmt->bindParam(':available', $available);
+        $stmt->bindParam(':image', $image);
+        $stmt->bindParam(':editor', $editor);
 
-        return $statementUpdateAlbum->execute();
+        return $stmt->execute();
     }
 
+    /** Récupère un album spécifique */
     public static function getOneAlbum(int $id): Album
     {
         $db = new Database();
         $connexion = $db->connect();
 
-        $statementReadOneAlbum = $connexion->prepare(
+        $stmt = $connexion->prepare(
             "SELECT m.id, m.title, m.author, m.available, m.image, a.editor
-              FROM media m
-              JOIN album a USING(id)
-              WHERE m.id = :id"
+             FROM media m
+             JOIN album a USING(id)
+             WHERE m.id = :id"
         );
+        $stmt->bindParam(':id', $id);
+        $stmt->execute();
+        $album = $stmt->fetch();
 
-        $statementReadOneAlbum->bindParam(':id', $id);
-        $statementReadOneAlbum->execute();
-        $album = $statementReadOneAlbum->fetch();
-
-        $album = new Album($album['id'], $album['title'], $album['author'], $album['available'], $album['image'], $album['editor']);
-
-        return $album;
+        return new Album(
+            $album['id'],
+            $album['title'],
+            $album['author'],
+            $album['available'],
+            $album['image'],
+            $album['editor']
+        );
     }
 
+    /** Supprime un album */
     public static function deleteAlbum(int $id): bool
     {
         $db = new Database();
         $connexion = $db->connect();
 
-        $statementDeleteAlbum = $connexion->prepare(
+        $stmt = $connexion->prepare(
             "DELETE m, a
-            FROM media m
-            JOIN album a USING(id)
-            WHERE m.id = :id"
+             FROM media m
+             JOIN album a USING(id)
+             WHERE m.id = :id"
         );
-        $statementDeleteAlbum->bindParam(':id', $id);
-        $success = $statementDeleteAlbum->execute();
-        return $success;
+        $stmt->bindParam(':id', $id);
+
+        return $stmt->execute();
     }
 
+    /** Récupère 3 albums disponibles aléatoires */
     public static function getThreeAvailableRandomAlbums(): array
     {
         $db = new Database();
         $connexion = $db->connect();
 
-        $statementGetThreeAvailableRandomAlbums = $connexion->prepare(
+        $stmt = $connexion->prepare(
             "SELECT m.id, m.title, m.author, m.available, m.image, a.editor
-             FROM media m 
+             FROM media m
              JOIN album a USING(id)
              WHERE m.available = 1
              ORDER BY RAND()
              LIMIT 3"
         );
-        $statementGetThreeAvailableRandomAlbums->execute();
-        $albumsDB = $statementGetThreeAvailableRandomAlbums->fetchAll();
+        $stmt->execute();
+        $albumsDB = $stmt->fetchAll();
+
         $albums = [];
         foreach ($albumsDB as $album) {
-            $albumInst = new Album($album['id'], $album['title'], $album['author'], $album['available'], $album['image'], $album['editor']);
-            array_push($albums, $albumInst);
+            $albums[] = new Album(
+                $album['id'],
+                $album['title'],
+                $album['author'],
+                $album['available'],
+                $album['image'],
+                $album['editor']
+            );
         }
 
         return $albums;
     }
 
+    /** Récupère tous les albums disponibles */
     public static function getAvailableAlbums(): array
     {
         $db = new Database();
         $connexion = $db->connect();
 
-        $statementGetAvailableAlbums = $connexion->prepare(
+        $stmt = $connexion->prepare(
             "SELECT m.id, m.title, m.author, m.available, m.image, a.editor
-             FROM media m 
+             FROM media m
              JOIN album a USING(id)
-             WHERE m.available = 1
-             ORDER BY RAND()
-             LIMIT 3"
+             WHERE m.available = 1"
         );
-        $statementGetAvailableAlbums->execute();
-        $albumsDB = $statementGetAvailableAlbums->fetchAll();
+        $stmt->execute();
+        $albumsDB = $stmt->fetchAll();
+
         $albums = [];
         foreach ($albumsDB as $album) {
-            $albumInst = new Album($album['id'], $album['title'], $album['author'], $album['available'], $album['image'], $album['editor']);
-            array_push($albums, $albumInst);
+            $albums[] = new Album(
+                $album['id'],
+                $album['title'],
+                $album['author'],
+                $album['available'],
+                $album['image'],
+                $album['editor']
+            );
         }
 
         return $albums;
     }
 
+    /** Recherche des albums par titre ou auteur */
     public static function searchAlbums(array $albums, string $search): array
     {
         $search = mb_strtolower(trim($search));
@@ -211,8 +264,7 @@ class Album extends Media
                 $title  = mb_strtolower($album->getTitle() ?? '');
                 $author = mb_strtolower($album->getAuthor() ?? '');
 
-                return str_contains($title, $search) ||
-                    str_contains($author, $search);
+                return str_contains($title, $search) || str_contains($author, $search);
             })
         );
     }

@@ -30,33 +30,6 @@ class Router
         ];
     }
 
-    public function put($uri, $controller)
-    {
-        $this->routes[] = [
-            'uri' => $uri,
-            'controller' => $controller,
-            'method' => 'PUT'
-        ];
-    }
-
-    public function delete($uri, $controller)
-    {
-        $this->routes[] = [
-            'uri' => $uri,
-            'controller' => $controller,
-            'method' => 'DELETE'
-        ];
-    }
-
-    public function patch($uri, $controller)
-    {
-        $this->routes[] = [
-            'uri' => $uri,
-            'controller' => $controller,
-            'method' => 'PATCH'
-        ];
-    }
-
     public function route($uri, $method)
     {
         foreach ($this->routes as $route) {
@@ -100,7 +73,6 @@ class Router
             if ($type && !$type->isBuiltin()) {
                 $dependencyClass = $type->getName();
 
-                // Créer l'instance de la dépendance
                 if (class_exists($dependencyClass)) {
                     $dependencies[] = new $dependencyClass($this->database);
                 } else {

@@ -24,12 +24,12 @@ class AlbumController
         $isLoggedIn = $this->isLoggedIn();
 
         $search = $_GET['search'] ?? null;
-        
+
         $onlyAvailable = isset($_GET['available']) && $_GET['available'] === 'on';
 
         $albums = $onlyAvailable ? Album::getAvailableAlbums() : Album::getAllAlbums();
 
-        if($search){
+        if ($search) {
             $albums = Album::searchAlbums($albums, $search);
         }
 
@@ -223,6 +223,50 @@ class AlbumController
                 exit;
             } else {
                 $error = "Impossible de supprimer l'album";
+            }
+        } else {
+            header('Location: /albums');
+            exit;
+        }
+    }
+
+    public function borrow(int $id)
+    {
+        $this->checkAuth();
+        $user_id = $_SESSION['user_id'] ?? null;
+
+        $album = Album::getOneAlbum($id);
+
+        if ($album) {
+            $success = Album::borrow($user_id, $id);
+
+            if ($success) {
+                header('Location: /albums');
+                exit;
+            } else {
+                $error = "Impossible de louer l'album.";
+            }
+        } else {
+            header('Location: /albums');
+            exit;
+        }
+    }
+
+    public function returnMedia(int $id)
+    {
+        $this->checkAuth();
+        $user_id = $_SESSION['user_id'] ?? null;
+
+        $album = Album::getOneAlbum($id);
+
+        if ($album) {
+            $success = Album::returnMedia($user_id, $id);
+
+            if ($success) {
+                header('Location: /albums');
+                exit;
+            } else {
+                $error = "Impossible de rendre l'album.";
             }
         } else {
             header('Location: /albums');

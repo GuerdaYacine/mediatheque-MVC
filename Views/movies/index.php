@@ -29,16 +29,31 @@
                 <?php endif; ?>
             </div>
 
-            <div>
+            <div class="filter-section">
                 <h1>Filtrer</h1>
-                <form action="" method="get">
-                    <label for="filter">Afficher seulement ceux disponibles</label>
-                    <input type="checkbox" name="available" id="filter">
+                <form action="" method="get" class="filter-form">
+                    <div class="filter-group">
+                        <label for="search">Recherche</label>
+                        <input type="text" name="search" id="search" placeholder="Recherchez par titre, auteur, genre" class="filter-input">
+                    </div>
 
-                    <input type="text" placeholder="Recherchez par titre, auteur ou genre" name="search">
-                    <button>Filtrer</button>
+                    <div class="filter-actions">
+                        <div class="filter-group checkbox">
+                            <input type="checkbox" name="available" id="filter" class="filter-checkbox">
+                            <label for="filter">Afficher seulement ceux disponibles</label>
+                        </div>
+
+                        <div style="display: flex; gap: 12px;">
+                            <button type="submit" class="filter-btn">Filtrer</button>
+
+                            <button type="button" class="filter-reset" onclick="document.querySelector('.filter-form').reset(); window.location.href = window.location.pathname;">
+                                Effacer
+                            </button>
+                        </div>
+                    </div>
                 </form>
             </div>
+
 
             <?php if (empty($movies)) : ?>
                 <div class="empty-state">
@@ -89,10 +104,23 @@
 
                             <?php if ($isLoggedIn) : ?>
                                 <div class="movie-actions">
-                                    <a href="#" class="action-btn view">
-                                        <i class="fas fa-eye"></i>
-                                        Emprunter
-                                    </a>
+                                    <?php if ($movie->getAvailable()) : ?>
+                                        <a href="/movies/<?= $movie->getId() ?>/borrow" class="action-btn view">
+                                            <i class="fas fa-eye"></i>
+                                            Emprunter
+                                        </a>
+                                    <?php elseif ($movie->getBorrowerId($movie->getId()) === $_SESSION['user_id']) : ?>
+                                        <a href="/movies/<?= $movie->getId() ?>/return" class="action-btn return">
+                                            <i class="fas fa-undo"></i>
+                                            Rendre
+                                        </a>
+                                    <?php else : ?>
+                                        <button class="action-btn view" disabled>
+                                            <i class="fas fa-eye"></i>
+                                            Emprunter (indisponible)
+                                        </button>
+                                    <?php endif; ?>
+
                                     <a href="/movies/<?= $movie->getId() ?>/edit" class="action-btn edit">
                                         <i class="fas fa-edit"></i>
                                         Modifier

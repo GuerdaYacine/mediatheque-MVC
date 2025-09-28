@@ -242,4 +242,48 @@ class MovieController
             exit;
         }
     }
+
+    public function borrow(int $id)
+    {
+        $this->checkAuth();
+        $user_id = $_SESSION['user_id'] ?? null;
+
+        $movie = Movie::getOneMovie($id);
+
+        if ($movie) {
+            $success = Movie::borrow($user_id, $id);
+
+            if ($success) {
+                header('Location: /movies');
+                exit;
+            } else {
+                $error = "Impossible de louer le film.";
+            }
+        } else {
+            header('Location: /movie');
+            exit;
+        }
+    }
+
+    public function returnMedia(int $id)
+    {
+        $this->checkAuth();
+        $user_id = $_SESSION['user_id'] ?? null;
+
+        $movie = Movie::getOneMovie($id);
+
+        if ($movie) {
+            $success = Movie::returnMedia($user_id, $id);
+
+            if ($success) {
+                header('Location: /movies');
+                exit;
+            } else {
+                $error = "Impossible de rendre le film.";
+            }
+        } else {
+            header('Location: /movie');
+            exit;
+        }
+    }
 }
