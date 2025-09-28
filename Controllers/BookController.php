@@ -23,7 +23,15 @@ class BookController
     {
         $isLoggedIn = $this->isLoggedIn();
 
-        $books = Book::getAllBooks();
+        $search = $_GET['search'] ?? null;
+        
+        $onlyAvailable = isset($_GET['available']) && $_GET['available'] === 'on';
+
+        $books = $onlyAvailable ? Book::getAvailableBooks() : Book::getAllBooks();
+
+        if($search){
+            $books = Book::searchBooks($books, $search);
+        }
 
         require_once __DIR__ . '/../Views/books/index.php';
     }

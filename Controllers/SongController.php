@@ -23,7 +23,17 @@ class SongController
     public function show(): void
     {
         $isLoggedIn = $this->isLoggedIn();
-        $songs = Song::getAllSongs();
+
+        $search = $_GET['search'] ?? null;
+        
+        $onlyAvailable = isset($_GET['available']) && $_GET['available'] === 'on';
+
+        $songs = $onlyAvailable ? Song::getAvailableSongs() : Song::getAllSongs();
+
+        if($search){
+            $songs = Song::searchSongs($songs, $search);
+        }
+        
         require_once __DIR__ . '/../Views/songs/index.php';
     }
 

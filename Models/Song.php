@@ -193,4 +193,47 @@ class Song
         $success = $statementDeleteSong->execute();
         return $success;
     }
+
+    public static function getAvailableSongs(): array
+    {
+        $db = new Database();
+        $connexion = $db->connect();
+        $stmt = $connexion->prepare(
+            "SELECT s.*, a.id AS album_id, m.title AS album_title 
+            FROM song s
+            LEFT JOIN album a ON s.album_id = a.id 
+            LEFT JOIN media m ON a.id = m.id
+            WHERE s.available = 1"
+        );
+        $stmt->execute();
+        $songsDB = $stmt->fetchAll();
+
+        $songs = [];
+        foreach ($songsDB as $song) {
+            $songInst = new Song($song['id'], $song['album_id'], $song['title'], $song['author'], $song['available'], $song['image'], $song['duration'], $song['note']);
+            $songInst->setAlbumTitle($song['album_title'] ?? null);
+            array_push($songs, $songInst);
+        }
+
+        return $songs;
+    }
+
+    public static function searchSongs(array $songs, string $search): array
+    {
+        $search = mb_strtolower(trim($search));
+        $tolerance = 2;
+
+        return array_values(
+            array_filter($songs, function (Song $song) use ($search, $tolerance) {
+                $title  = mb_strtolower($song->getTitle() ?? '');
+                $author = mb_strtolower($song->getAuthor() ?? '');
+                $album  = mb_strtolower($song->getAlbumTitle() ?? '');
+
+                return str_contains($title, $search) ||
+                    str_contains($author, $search) ||
+                    str_contains($album, $search);
+            })
+        );
+    }
+
 }

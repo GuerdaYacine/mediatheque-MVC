@@ -177,4 +177,43 @@ class Album extends Media
 
         return $albums;
     }
+
+    public static function getAvailableAlbums(): array
+    {
+        $db = new Database();
+        $connexion = $db->connect();
+
+        $statementGetAvailableAlbums = $connexion->prepare(
+            "SELECT m.id, m.title, m.author, m.available, m.image, a.editor
+             FROM media m 
+             JOIN album a USING(id)
+             WHERE m.available = 1
+             ORDER BY RAND()
+             LIMIT 3"
+        );
+        $statementGetAvailableAlbums->execute();
+        $albumsDB = $statementGetAvailableAlbums->fetchAll();
+        $albums = [];
+        foreach ($albumsDB as $album) {
+            $albumInst = new Album($album['id'], $album['title'], $album['author'], $album['available'], $album['image'], $album['editor']);
+            array_push($albums, $albumInst);
+        }
+
+        return $albums;
+    }
+
+    public static function searchAlbums(array $albums, string $search): array
+    {
+        $search = mb_strtolower(trim($search));
+
+        return array_values(
+            array_filter($albums, function (Album $album) use ($search) {
+                $title  = mb_strtolower($album->getTitle() ?? '');
+                $author = mb_strtolower($album->getAuthor() ?? '');
+
+                return str_contains($title, $search) ||
+                    str_contains($author, $search);
+            })
+        );
+    }
 }

@@ -33,7 +33,8 @@
                 <h1>Filtrer</h1>
                 <form action="" method="get">
                     <label for="filter">Afficher seulement ceux disponibles</label>
-                    <input type="checkbox" name="filter" id="filter">
+                    <input type="checkbox" name="available" id="filter">
+                    <input type="text" name="search" placeholder="Rechercher par titre ou auteur">
                     <button>Filtrer</button>
                 </form>
             </div>

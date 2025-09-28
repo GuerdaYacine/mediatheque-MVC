@@ -158,4 +158,43 @@ class Book extends Media
 
         return $books;
     }
+
+    public static function getAvailableBooks(): array
+    {
+        $db = new Database();
+        $connexion = $db->connect();
+
+        $statementGetAvailableBooks = $connexion->prepare(
+            "SELECT m.id, m.title, m.author, m.available, m.image, b.page_number
+            FROM media m
+            JOIN book b USING(id)
+            WHERE m.available = 1"
+        );
+        $statementGetAvailableBooks->execute();
+        $booksDB = $statementGetAvailableBooks->fetchAll();
+        $books = [];
+        foreach ($booksDB as $book) {
+            $bookInst = new Book($book['id'], $book['title'], $book['author'], $book['available'], $book['image'], $book['page_number']);
+            array_push($books, $bookInst);
+        }
+
+        return $books;
+    }
+
+        public static function searchBooks(array $books, string $search): array
+    {
+        $search = mb_strtolower(trim($search));
+
+        return array_values(
+            array_filter($books, function (Book $books) use ($search) {
+                $title  = mb_strtolower($books->getTitle() ?? '');
+                $author = mb_strtolower($books->getAuthor() ?? '');
+
+                return str_contains($title, $search) ||
+                    str_contains($author, $search);
+            })
+        );
+    }
+
+
 }

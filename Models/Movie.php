@@ -180,6 +180,46 @@ class Movie extends Media
         return $movies;
     }
 
+    public static function getAvailableMovies(){;
+        $db = new Database();
+        $connexion = $db->connect();
+
+        $statementGetAvailableRandomMovies = $connexion->prepare(
+            "SELECT m.id, m.title, m.author, m.available, m.image, mo.duration, mo.genre
+            FROM media m
+            JOIN movie mo USING(id)
+            WHERE m.available = 1"
+        );
+        $statementGetAvailableRandomMovies->execute();
+        $moviesDB = $statementGetAvailableRandomMovies->fetchAll();
+        $movies = [];
+        foreach ($moviesDB as $movie) {
+            $movieInst = new Movie($movie['id'], $movie['title'], $movie['author'], $movie['available'], $movie['image'], $movie['duration'], Genre::from($movie['genre']));
+            array_push($movies, $movieInst);
+        }
+
+        return $movies;
+    }
+
+    public static function searchMovies(array $movies, string $search): array
+    {
+        $search = mb_strtolower(trim($search));
+
+        return array_values(
+            array_filter($movies, function (Movie $movie) use ($search) {
+                $title  = mb_strtolower($movie->getTitle() ?? '');
+                $author = mb_strtolower($movie->getAuthor() ?? '');
+                $genre  = mb_strtolower($movie->getGenre()->value ?? '');
+
+                return str_contains($title, $search) ||
+                    str_contains($author, $search) ||
+                    str_contains($genre, $search);
+            })
+        );
+    }
+
+
+
     // public function getAvailableMovies(?string $search = null): array
     // {
     //     if ($search) {

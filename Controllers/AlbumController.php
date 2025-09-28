@@ -23,7 +23,15 @@ class AlbumController
     {
         $isLoggedIn = $this->isLoggedIn();
 
-        $albums = Album::getAllAlbums();
+        $search = $_GET['search'] ?? null;
+        
+        $onlyAvailable = isset($_GET['available']) && $_GET['available'] === 'on';
+
+        $albums = $onlyAvailable ? Album::getAvailableAlbums() : Album::getAllAlbums();
+
+        if($search){
+            $albums = Album::searchAlbums($albums, $search);
+        }
 
         foreach ($albums as $album) {
             $album->setTrackNumber(Album::getTrackNumber($album->getId()));

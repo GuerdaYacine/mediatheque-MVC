@@ -26,14 +26,17 @@ class MovieController
         $isLoggedIn = $this->isLoggedIn();
 
         $search = $_GET['search'] ?? null;
+        $onlyAvailable = isset($_GET['available']) && $_GET['available'] === 'on';
 
-        $movies = Movie::getAllMovies();
+        $movies = $onlyAvailable ? Movie::getAvailableMovies() : Movie::getAllMovies();
 
-        // var_dump($movies);
-        // die;
+        if ($search) {
+            $movies = Movie::searchMovies($movies, $search);
+        }
 
         require_once __DIR__ . '/../Views/movies/index.php';
     }
+
 
     public function create(): void
     {
