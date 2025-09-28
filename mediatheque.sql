@@ -100,10 +100,10 @@ CREATE TABLE `location` (
     `returned_at` timestamp NULL DEFAULT NULL,
     PRIMARY KEY (`id`),
     KEY `user_id` (`user_id`),
-    KEY `media_id` (`media_id`),
-    CONSTRAINT `location_ibfk_1` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`),
-    CONSTRAINT `location_ibfk_2` FOREIGN KEY (`media_id`) REFERENCES `media` (`id`)
-) ENGINE = InnoDB DEFAULT CHARSET = utf8mb4 COLLATE = utf8mb4_unicode_ci;
+    KEY `location_ibfk_2` (`media_id`),
+    CONSTRAINT `location_ibfk_1` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON DELETE CASCADE,
+    CONSTRAINT `location_ibfk_2` FOREIGN KEY (`media_id`) REFERENCES `media` (`id`) ON DELETE CASCADE
+) ENGINE = InnoDB AUTO_INCREMENT = 18 DEFAULT CHARSET = utf8mb4 COLLATE = utf8mb4_unicode_ci;
 /*!40101 SET character_set_client = @saved_cs_client */
 ;
 
@@ -135,7 +135,7 @@ CREATE TABLE `media` (
     `image` varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL,
     `media_type` enum('book', 'album', 'movie') COLLATE utf8mb4_unicode_ci NOT NULL,
     PRIMARY KEY (`id`)
-) ENGINE = InnoDB AUTO_INCREMENT = 42 DEFAULT CHARSET = utf8mb4 COLLATE = utf8mb4_unicode_ci;
+) ENGINE = InnoDB AUTO_INCREMENT = 68 DEFAULT CHARSET = utf8mb4 COLLATE = utf8mb4_unicode_ci;
 /*!40101 SET character_set_client = @saved_cs_client */
 ;
 
@@ -207,7 +207,7 @@ CREATE TABLE `song` (
     PRIMARY KEY (`id`),
     KEY `song_ibfk_1` (`album_id`),
     CONSTRAINT `song_ibfk_1` FOREIGN KEY (`album_id`) REFERENCES `album` (`id`) ON DELETE CASCADE
-) ENGINE = InnoDB AUTO_INCREMENT = 9 DEFAULT CHARSET = utf8mb4 COLLATE = utf8mb4_unicode_ci;
+) ENGINE = InnoDB AUTO_INCREMENT = 16 DEFAULT CHARSET = utf8mb4 COLLATE = utf8mb4_unicode_ci;
 /*!40101 SET character_set_client = @saved_cs_client */
 ;
 
@@ -240,7 +240,7 @@ CREATE TABLE `users` (
     `updated_at` datetime DEFAULT NULL ON UPDATE CURRENT_TIMESTAMP,
     PRIMARY KEY (`id`),
     UNIQUE KEY `email` (`email`)
-) ENGINE = InnoDB AUTO_INCREMENT = 4 DEFAULT CHARSET = utf8mb4 COLLATE = utf8mb4_unicode_ci;
+) ENGINE = InnoDB AUTO_INCREMENT = 11 DEFAULT CHARSET = utf8mb4 COLLATE = utf8mb4_unicode_ci;
 /*!40101 SET character_set_client = @saved_cs_client */
 ;
 
@@ -251,16 +251,6 @@ CREATE TABLE `users` (
 LOCK TABLES `users` WRITE;
 /*!40000 ALTER TABLE `users` DISABLE KEYS */
 ;
-INSERT INTO
-    `users`
-VALUES (
-        3,
-        'yexouwu',
-        'guerda.yacine60100@gmail.com',
-        '$argon2id$v=19$m=65536,t=4,p=1$ckpZMS9DVzNPRzQyRXZ0cw$h4vy88Q3nwNqztYo00KmsyzhCV4KAWwysNjmlcJ7Tvo',
-        '2025-09-20 13:09:29',
-        NULL
-    );
 /*!40000 ALTER TABLE `users` ENABLE KEYS */
 ;
 UNLOCK TABLES;
@@ -282,4 +272,4 @@ UNLOCK TABLES;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */
 ;
 
--- Dump completed on 2025-09-25 23:36:46
+-- Dump completed on 2025-09-28 16:38:22
