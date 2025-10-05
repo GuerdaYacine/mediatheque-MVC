@@ -408,7 +408,7 @@ class Song
         $search = mb_strtolower(trim($search));
 
         return array_values(
-            array_filter($songs, function (Song $song) use ($search, $tolerance) {
+            array_filter($songs, function (Song $song) use ($search) {
                 $title  = mb_strtolower($song->getTitle() ?? '');
                 $author = mb_strtolower($song->getAuthor() ?? '');
                 $album  = mb_strtolower($song->getAlbumTitle() ?? '');
