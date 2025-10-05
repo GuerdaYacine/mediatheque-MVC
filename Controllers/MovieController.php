@@ -274,12 +274,7 @@ class MovieController
 
         $borrowerId = Movie::getBorrowerId($id);
 
-        if ($borrowerId === null) {
-            header('Location: /movies');
-            exit;
-        }
-
-        if ($borrowerId !== $user_id) {
+        if ($borrowerId === null || $borrowerId !== $user_id) {
             header('Location: /movies');
             exit;
         }

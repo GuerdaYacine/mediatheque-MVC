@@ -283,12 +283,9 @@ class Album extends Media
     }
 
     /**
-     * Récupère trois albums disponibles de manière aléatoire
+     * Récupère tous les albums disponibles
      * 
-     * Note: Cette méthode semble identique à getThreeAvailableRandomAlbums()
-     * mais avec un nom différent suggérant qu'elle devrait retourner tous les albums disponibles.
-     * 
-     * @return array Tableau de 3 instances Album maximum, sélectionnées aléatoirement
+     * @return array Tableau d'instances Album avec available = 1
      */
     public static function getAvailableAlbums(): array
     {
@@ -299,9 +296,7 @@ class Album extends Media
             "SELECT m.id, m.title, m.author, m.available, m.image, a.editor
              FROM media m 
              JOIN album a USING(id)
-             WHERE m.available = 1
-             ORDER BY RAND()
-             LIMIT 3"
+             WHERE m.available = 1"
         );
         $statementGetAvailableAlbums->execute();
         $albumsDB = $statementGetAvailableAlbums->fetchAll();

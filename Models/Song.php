@@ -338,7 +338,7 @@ class Song
         $statementReadOneSong->execute();
         $song = $statementReadOneSong->fetch();
 
-        if(!$song){
+        if (!$song) {
             return null;
         }
 
@@ -406,7 +406,6 @@ class Song
     public static function searchSongs(array $songs, string $search): array
     {
         $search = mb_strtolower(trim($search));
-        $tolerance = 2;
 
         return array_values(
             array_filter($songs, function (Song $song) use ($search, $tolerance) {

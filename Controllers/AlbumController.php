@@ -261,16 +261,11 @@ class AlbumController
 
         $borrowerId = Album::getBorrowerId($id);
 
-        if ($borrowerId === null) {
+        if ($borrowerId === null || $borrowerId !== $user_id) {
             header('Location: /albums');
             exit;
         }
 
-        if ($borrowerId !== $user_id) {
-            header('Location: /albums');
-            exit;
-        }
-        
         if ($album) {
             $success = Album::returnMedia($user_id, $id);
 

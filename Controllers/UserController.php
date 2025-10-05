@@ -44,9 +44,10 @@ class UserController
                 $errors['password'] = 'Veuillez saisir un mot de passe';
             } elseif (!preg_match('/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[\W_]).{8,}$/', $password)) {
                 $errors['password'] = 'Le mot de passe doit contenir au moins 8 caractères, une majuscule, une minuscule, un chiffre et un caractère spécial';
-            } elseif (str_contains($password, $username)) {
+            } elseif (str_contains(strtolower($password), strtolower($username))) {
                 $errors['password'] = 'Le mot de passe ne doit pas contenir le nom d\'utilisateur';
             }
+
 
             if (empty(array_filter($errors))) {
                 $user = User::createUser($username, $email, $password);
@@ -91,7 +92,7 @@ class UserController
                     $_SESSION['user_id'] = $user->getId();
                     $_SESSION['username'] = $user->getUsername();
                     $_SESSION['email'] = $user->getEmail();
-                    header("Location: /albums");
+                    header("Location: /");
                     exit;
                 } else {
                     $errors['password'] = 'Email ou mot de passe incorrect';
