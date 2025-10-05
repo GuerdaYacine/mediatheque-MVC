@@ -73,8 +73,7 @@
                         <div class="song-card">
                             <div class="song-image">
                                 <img src="<?= $song->getImage() ?>"
-                                    alt="Image de la musique <?= $song->getTitle() ?>"
-                                    onerror="this.src='/assets/images/song-placeholder.jpg'">
+                                    alt="Image de la musique <?= $song->getTitle() ?>">
 
                                 <div class="availability-badge <?= $song->getAvailable() == 1 ? 'available' : 'unavailable' ?>">
                                     <i class="fas <?= $song->getAvailable() == 1 ? 'fa-check' : 'fa-times' ?>"></i>

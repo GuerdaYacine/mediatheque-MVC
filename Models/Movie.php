@@ -200,7 +200,7 @@ class Movie extends Media
      * @param int $id L'identifiant du film
      * @return Movie L'instance Movie correspondante
      */
-    public static function getOneMovie(int $id): Movie
+    public static function getOneMovie(int $id): ?Movie
     {
         $db = new Database();
         $connexion = $db->connect();
@@ -215,6 +215,10 @@ class Movie extends Media
         $statementReadOneMovie->bindParam(':id', $id);
         $statementReadOneMovie->execute();
         $movie = $statementReadOneMovie->fetch();
+
+        if(!$movie){
+            return null;
+        }
 
         $movie = new Movie($movie['id'], $movie['title'], $movie['author'], $movie['available'], $movie['image'], $movie['duration'], Genre::from($movie['genre']));
 

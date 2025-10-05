@@ -238,7 +238,6 @@ class SongController
         $song = Song::getOneSong($id);
 
         if ($song) {
-
             $success = Song::deleteSong($id);
 
             if ($success) {

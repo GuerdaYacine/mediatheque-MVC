@@ -160,7 +160,7 @@ class Book extends Media
      * @param int $id L'identifiant du livre
      * @return Book L'instance Book correspondante
      */
-    public static function getOneBook(int $id): Book
+    public static function getOneBook(int $id): ?Book
     {
         $db = new Database();
         $connexion = $db->connect();
@@ -175,6 +175,10 @@ class Book extends Media
         $statementReadOneBook->bindParam(':id', $id);
         $statementReadOneBook->execute();
         $book = $statementReadOneBook->fetch();
+
+        if(!$book){
+            return null;
+        }
 
         $book = new Book($book['id'], $book['title'], $book['author'], $book['available'], $book['image'], $book['page_number']);
 

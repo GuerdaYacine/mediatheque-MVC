@@ -72,8 +72,7 @@
                         <div class="book-card">
                             <div class="book-image">
                                 <img src="<?= $book->getImage() ?>"
-                                    alt="Couverture du livre <?= $book->getTitle() ?>"
-                                    onerror="this.src='/assets/images/book-placeholder.jpg'">
+                                    alt="Couverture du livre <?= $book->getTitle() ?>">
                                 <div class="availability-badge <?= $book->getAvailable() == 1 ? 'available' : 'unavailable' ?>">
                                     <i class="fas <?= $book->getAvailable() == 1 ? 'fa-check' : 'fa-times' ?>"></i>
                                     <?= $book->getAvailable() == 1 ? 'Disponible' : 'Indisponible' ?>

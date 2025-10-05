@@ -257,6 +257,18 @@ class BookController
         $user_id = $_SESSION['user_id'] ?? null;
 
         $book = Book::getOneBook($id);
+        
+        $borrowerId = Book::getBorrowerId($id);
+
+        if ($borrowerId === null) {
+            header('Location: /books');
+            exit;
+        }
+
+        if ($borrowerId !== $user_id) {
+            header('Location: /books');
+            exit;
+        }
 
         if ($book) {
             $success = Book::returnMedia($user_id, $id);

@@ -260,7 +260,7 @@ class MovieController
                 $error = "Impossible de louer le film.";
             }
         } else {
-            header('Location: /movie');
+            header('Location: /movies');
             exit;
         }
     }
@@ -271,6 +271,18 @@ class MovieController
         $user_id = $_SESSION['user_id'] ?? null;
 
         $movie = Movie::getOneMovie($id);
+
+        $borrowerId = Movie::getBorrowerId($id);
+
+        if ($borrowerId === null) {
+            header('Location: /movies');
+            exit;
+        }
+
+        if ($borrowerId !== $user_id) {
+            header('Location: /movies');
+            exit;
+        }
 
         if ($movie) {
             $success = Movie::returnMedia($user_id, $id);

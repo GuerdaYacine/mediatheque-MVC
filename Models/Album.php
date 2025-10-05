@@ -196,26 +196,38 @@ class Album extends Media
      * @param int $id L'identifiant de l'album
      * @return Album L'instance Album correspondante
      */
-    public static function getOneAlbum(int $id): Album
+    public static function getOneAlbum(int $id): ?Album
     {
         $db = new Database();
         $connexion = $db->connect();
 
-        $statementReadOneAlbum = $connexion->prepare(
-            "SELECT m.id, m.title, m.author, m.available, m.image, a.editor
-              FROM media m
-              JOIN album a USING(id)
-              WHERE m.id = :id"
-        );
-
+        $statementReadOneAlbum = $connexion->prepare("
+            SELECT m.id, m.title, m.author, m.available, m.image, a.editor
+            FROM media m
+            JOIN album a USING(id)
+            WHERE m.id = :id
+        ");
         $statementReadOneAlbum->bindParam(':id', $id);
         $statementReadOneAlbum->execute();
+
         $album = $statementReadOneAlbum->fetch();
 
-        $album = new Album($album['id'], $album['title'], $album['author'], $album['available'], $album['image'], $album['editor']);
+        if (!$album) {
+            return null;
+        }
+
+        $album = new Album(
+            $album['id'],
+            $album['title'],
+            $album['author'],
+            $album['available'],
+            $album['image'],
+            $album['editor']
+        );
 
         return $album;
     }
+
 
     /**
      * Supprime un album de la base de données

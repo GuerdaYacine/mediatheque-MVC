@@ -321,7 +321,7 @@ class Song
      * @param int $id L'identifiant de la chanson
      * @return Song L'instance Song correspondante
      */
-    public static function getOneSong(int $id): Song
+    public static function getOneSong(int $id): ?Song
     {
         $db = new Database();
         $connexion = $db->connect();
@@ -337,6 +337,10 @@ class Song
         $statementReadOneSong->bindParam(':id', $id);
         $statementReadOneSong->execute();
         $song = $statementReadOneSong->fetch();
+
+        if(!$song){
+            return null;
+        }
 
         $song = new Song($song['id'], $song['album_id'], $song['title'], $song['author'], $song['available'], $song['image'], $song['duration'], $song['note']);
 
