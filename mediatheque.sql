@@ -55,7 +55,7 @@ CREATE TABLE `song` (
 DROP TABLE IF EXISTS `users`;
 CREATE TABLE `users` (
     `id` int unsigned NOT NULL AUTO_INCREMENT,
-    `username` varchar(50) COLLATE utf8mb4_unicode_ci NOT NULL,
+    `username` varchar(100) COLLATE utf8mb4_unicode_ci NOT NULL,
     `email` varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL,
     `password` varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL,
     `created_at` datetime DEFAULT CURRENT_TIMESTAMP,
